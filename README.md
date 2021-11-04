@@ -1,8 +1,8 @@
-# Ebudget
+# ebudget
 
-for manage ebudgeting on Krakatau International Port
+E-Budgeting for Krakatau International Port
 
-## Requitment App
+## Requitments
 
 - PHP : 7.2.5
 - Laravel : 7.0
