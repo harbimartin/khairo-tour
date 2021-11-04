@@ -4,5 +4,9 @@ E-Budgeting for Krakatau International Port
 
 ## Requitments
 
-PHP version : 7.2.5
-Laravel version : 7.0
+- PHP : 7.2.5
+- Laravel : 7.0
+
+## Author Code
+
+Krakatau International Port - IT
