@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', function () {
-    return view('index');
+    return view('pages.home');
 });
 
 Route::post('user/login', [AuthController::class,'method_login']);
