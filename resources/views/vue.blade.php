@@ -3,7 +3,7 @@
 var vue = new Vue({
     el:"#vue-app",
     data : {
-        header: "Record Testing",
+        header: "E-Budget",
         content : 0,
         test : false
     },
