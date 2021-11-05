@@ -18,6 +18,18 @@
                         class="rounded-full md:h-3/5 md:w-3/5 mx-auto" alt="avatar">
                     <h6 class="font-semibold mt-2">Username Users</h6>
                 </div>
+
+                {{-- Menu list --}}
+                <div class="mt-4">
+                    <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
+                        <img class="h-5 w-5 my-auto" src="{{url('/assets/home.svg')}}" alt="home">
+                        <a href="/" class="my-auto ml-3 text-sm font-semibold">Home</a>
+                    </div>
+                    <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
+                        <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_data.png')}}" alt="menu_data">
+                        <a href="/masterdata" class="my-auto ml-3 text-sm font-semibold">Master Data</a>
+                    </div>
+                </div>
             </div>
             {{-- end region --}}
 
