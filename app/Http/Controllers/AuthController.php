@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    
+
     public function view_index(){
-        if(!Auth::check())
-            return redirect('/login');
+        // if(!Auth::check())
+        //     return redirect('/login');
         return view('pages.home');
     }
 
@@ -29,5 +29,5 @@ class AuthController extends Controller
             return redirect('/user/login')->with('failure','Account anda tidak ditemukan !');
         }
         return redirect('/');
-    } 
+    }
 }
