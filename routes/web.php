@@ -3,10 +3,11 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/', function () {
-    return view('pages.home');
+Route::get('/login', function () {
+    return view('login');
 });
+// Index
+Route::get('/', [AuthController::class,'view_index']);
 Route::get('/masterdata', function () {
     return view('pages.masterdata');
 });
@@ -14,6 +15,3 @@ Route::get('/masterdata', function () {
 Route::post('user/login', [AuthController::class,'method_login']);
 
 
-
-// Index
-Route::get('index', [AuthController::class,'method_login']);

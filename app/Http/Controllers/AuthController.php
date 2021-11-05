@@ -3,9 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    
+    public function view_index(){
+        if(!Auth::check())
+            return redirect('/login');
+        return view('pages.home');
+    }
+
     public function method_login(Request $request){
 
         $credentials = $request->validate([
@@ -13,18 +21,13 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $credentials['password'] = 'appcoregwnih'.$request->password;
+        // if this encrypt password. you can setup encrypt
+        // for e-budget, encrypt default laravel
+        $credentials['password'] = $request->password;
+
         if(!Auth::attempt($credentials)){
             return redirect('/user/login')->with('failure','Account anda tidak ditemukan !');
         }
-
-        // if(session()->get('url_gto'))
-        //     return redirect(session()->get('url_gto'));
-
-        // if(Auth::user()->group_id == 2)
-        //     return redirect('/mkl/' . Session::getId() . '/' . base64_encode(Auth::user()->id));
-        // if(Auth::user()->group_id == 33)
-        //     return redirect('/gto/' . Session::getId());
-        return redirect('/index');
+        return redirect('/');
     } 
 }
