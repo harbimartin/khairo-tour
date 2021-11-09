@@ -1,6 +1,6 @@
 @yield('index')
 <script>
-var vue = new Vue({
+var vue = new Vue({up
     el:"#vue-app",
     data : {
         header: "E-Budget",

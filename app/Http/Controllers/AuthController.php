@@ -13,7 +13,9 @@ class AuthController extends Controller
         //     return redirect('/login');
         return view('pages.home');
     }
-
+    public function view_login(){
+        return view('login');
+    }
     public function method_login(Request $request){
 
         $credentials = $request->validate([

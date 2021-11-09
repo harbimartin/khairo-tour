@@ -31,6 +31,12 @@
                             <p class="my-auto ml-3 text-sm font-semibold">Master Data</p>
                         </div>
                     </a>
+                    <a href="/pengalihan_anggaran">
+                        <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
+                            <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_data.png')}}" alt="menu_data">
+                            <p class="my-auto ml-3 text-sm font-semibold">Pengalihan</p>
+                        </div>
+                    </a>
                     <a href="/login">
                         <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
                             <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_logout.png')}}" alt="menu_logout">
@@ -45,14 +51,7 @@
                 </div>
             </div>
         </section>
-        <section class="pages md:w-5/6 w-full h-screen mac-h-screen">
-            <span v-if="test">
-                Tost
-            </span>
-            <span v-else>
-                Test
-            </span>
-            <input type="button" @click="test=!test" value="pass">
+        <section class="pages md:w-5/6 w-full h-screen mac-h-screen bg-gray-200">
             @yield('content')
         </section>
     </section>
