@@ -16,7 +16,7 @@ class Add extends Component
      *
      * @return void
      */
-    public function __construct($title, $column, $url, $select = [], $error = '')
+    public function __construct($title, $column, $url = '', $select = [], $error = '')
     {
         $this->title = $title;
         $this->column = $column;

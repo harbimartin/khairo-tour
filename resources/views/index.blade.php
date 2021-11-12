@@ -25,10 +25,28 @@
                             <p class="my-auto ml-3 text-sm font-semibold">Home</p>
                         </div>
                     </a>
+                    <a href="/persetujuan">
+                        <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
+                            <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_data.png')}}" alt="menu_data">
+                            <p class="my-auto ml-3 text-sm font-semibold">Persetujuan</p>
+                        </div>
+                    </a>
                     <a href="/masterdata">
                         <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
                             <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_data.png')}}" alt="menu_data">
                             <p class="my-auto ml-3 text-sm font-semibold">Master Data</p>
+                        </div>
+                    </a>
+                    <a href="/pengajuan">
+                        <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
+                            <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_data.png')}}" alt="menu_data">
+                            <p class="my-auto ml-3 text-sm font-semibold">Pengajuan MRA</p>
+                        </div>
+                    </a>
+                    <a href="/overview">
+                        <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
+                            <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_data.png')}}" alt="menu_data">
+                            <p class="my-auto ml-3 text-sm font-semibold">Overview MRA</p>
                         </div>
                     </a>
                     <a href="/pengalihan_anggaran">
@@ -51,11 +69,13 @@
                 </div>
             </div>
         </section>
-        <section class="pages md:w-5/6 w-full h-screen mac-h-screen bg-gray-200">
-            @yield('content')
+        <section class="pages md:w-5/6 w-full h-screen max-h-screen bg-gray-200">
+            <div class="overflow-y-auto max-h-screen">
+                @yield('content')
+            </div>
         </section>
     </section>
-    @extends('vue');
+    {{-- @extends('vue'); --}}
 </body>
 <script src="https://rawgit.com/moment/moment/2.2.1/min/moment.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>

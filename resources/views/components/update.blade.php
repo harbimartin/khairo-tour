@@ -1,8 +1,8 @@
 <div class="px-6">
     <?php
         $query = $_GET;
-        $id = $query['id'];
-        unset($query['id']);
+        $id = $query[$idk];
+        unset($query[$idk]);
         $back_query = request()->url().($query ? '?'.http_build_query($query):'');
     ?>
     <a
@@ -42,6 +42,32 @@
                                     <option value={{$item['id']}} {{$datas[$key]==$item['id'] ? 'selected': ''}}>{{$item[$param->val]}}</option>
                                 @endforeach
                             </select>
+                        @break
+                        @case('TextArea')
+                            <textarea id="{{$key}}" name="{{$key}}" type="textarea" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                            </textarea>
+                        @break
+                        @case('Upload')
+                            <input
+                                class="hidden"
+                                type="file"
+                                id={{$key}} name="{{$key}}"
+                                accept="application/pdf"
+                            >
+                            <div class="inline-flex flex">
+                                <label class="bg-blue-400 hover:bg-blue-600 text-white cursor-pointer rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition" for="{{$key}}">Upload</label>
+                                <span id="file-chosen">No file chosen</span>
+                            </div>
+                            <script>
+                                const actualBtn = document.getElementById({!! json_encode($key) !!});
+                                const fileChosen = document.getElementById('file-chosen');
+                                actualBtn.addEventListener('change', function(){
+                                    fileChosen.textContent = this.files[0].name
+                                })
+                            </script>
+                        @break
+                        @case('Date')
+                            <input id="{{$key}}" name="{{$key}}" type="date" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                         @break
                         @default
                     @endswitch

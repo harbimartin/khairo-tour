@@ -8,14 +8,16 @@ class Table extends Component
 {
     public $column;
     public $datas;
+    public $datef;
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($column, $datas){
+    public function __construct($column, $datas, $datef = false){
         $this->column = $column;
         $this->datas = $datas;
+        $this->datef = $datef;
     }
 
     /**

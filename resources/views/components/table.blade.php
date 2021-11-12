@@ -6,6 +6,14 @@
                 <input type="number" value="10" maxlength="2" size="2" class="w-16 rounded-lg border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                 &nbsp;Entries
             </span>
+            @if($datef)
+                <span class="ml-auto">
+                    From <input type="date" class="rounded-lg border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                </span>
+                <span class="ml-auto">
+                    To <input type="date" class="rounded-lg border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                </span>
+            @endif
             <span class="ml-auto">
                 Search : <input type="search" class="rounded-lg border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
             </span>

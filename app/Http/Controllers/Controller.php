@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\File;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Validator;
 
@@ -47,4 +49,29 @@ class Controller extends BaseController
             unlink($file_loc);
         }
     }
+
+    public function fileUpload(Request $request){
+        // if ($validate = $this->validing($request->all(), [
+        //     'file' => 'required|mimes:csv,txt,xlx,xls,pdf|max:2048'
+        // ]))
+        //     return $validate;
+        $request->validate([
+            'file' => 'required|mimes:csv,txt,xlx,xls,pdf|max:2048'
+        ]);
+        $file = new File();
+
+        if($request->file()) {
+            $request->number = File::where(['code'=>$request->code, 'key'=>$request->key])->max('number');
+            // $fileName = $request->code.'-'.$request->key.->getClientOriginalName();
+            // $filePath = $request->file('file')->storeAs('uploads', $fileName, 'public');
+
+            // $file->name = time().'_'.$request->file->getClientOriginalName();
+            // $file->file_path = '/storage/' . $filePath;
+            // $file->save();
+
+            // return back()
+            // ->with('success','File has been uploaded.')
+            // ->with('file', $fileName);
+        }
+}
 }

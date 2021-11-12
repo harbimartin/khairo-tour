@@ -7,7 +7,7 @@
             @csrf
             @foreach (json_decode($column) as $key => $param)
                 <div class="inline-flex grid {{ isset($param->full) ? 'grid-cols-6 col-span-2':'grid-cols-3'}}">
-                    <label for="{{$key}}" class="my-auto">{{$param->name}}</label>
+                    <label for="{{$key}}" class="mt-1">{{$param->name}}</label>
                     @switch($param->type)
                         @case('String')
                             <input id="{{$key}}" name="{{$key}}" type="text" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
@@ -16,12 +16,37 @@
                             <input id="{{$key}}" name="{{$key}}" type="number" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                         @break
                         @case('Select')
-                        {{-- {{$select[$param->api]}} --}}
                             <select id="{{$key}}" name="{{$key}}" type="number" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
                                 @foreach ($select[$param->api] as $item)
                                     <option value={{$item['id']}}>{{$item[$param->val]}}</option>
                                 @endforeach
                             </select>
+                        @break
+                        @case('TextArea')
+                            <textarea id="{{$key}}" name="{{$key}}" type="textarea" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                            </textarea>
+                        @break
+                        @case('Upload')
+                            <input
+                                class="hidden"
+                                type="file"
+                                id={{$key}} name="{{$key}}"
+                                accept="application/pdf"
+                            >
+                            <div class="inline-flex flex">
+                                <label class="bg-blue-400 hover:bg-blue-600 text-white cursor-pointer rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition" for="{{$key}}">Upload</label>
+                                <span id="file-chosen">No file chosen</span>
+                            </div>
+                            <script>
+                                const actualBtn = document.getElementById({!! json_encode($key) !!});
+                                const fileChosen = document.getElementById('file-chosen');
+                                actualBtn.addEventListener('change', function(){
+                                    fileChosen.textContent = this.files[0].name
+                                })
+                            </script>
+                        @break
+                        @case('Date')
+                            <input id="{{$key}}" name="{{$key}}" type="date" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                         @break
                         @default
                     @endswitch
