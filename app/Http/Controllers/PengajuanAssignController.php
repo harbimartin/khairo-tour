@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\BudgetPeriod;
 use App\BudgetVersion;
+use App\SapAccount;
+use App\SapDocType;
 use Illuminate\Http\Request;
 
 class PengajuanAssignController extends Controller
@@ -26,9 +28,9 @@ class PengajuanAssignController extends Controller
         //     }
         // }
         $select = [
-            'pr_doc' => [['id'=>1,'name'=>'Ceritanya Type 1'],['id'=>2, 'name'=>'Ceritanya Type 2']],
+            'pr_doc' => SapDocType::where('status', 1)->get(),
             'budget_version' => BudgetVersion::where('status', 1)->get(),
-            'glaccount' => [['id'=>1,'name'=>'Account 1'],['id'=>2, 'name'=>'Account 2']],
+            'glaccount' => SapAccount::where('status', 1)->get(),
             'costcenter' => [['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
             'internal' => [['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
         ];

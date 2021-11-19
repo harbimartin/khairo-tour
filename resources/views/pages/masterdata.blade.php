@@ -15,6 +15,10 @@
                 <a class="rounded-md bg-white inline-block py-2 px-4 font-semibold {{$tab == 'index' ? 'bg-blue-400 text-white':''}}"
                     href="/masterdata">Budget Version</a>
             </li>
+            <li class="-mb-px mr-2">
+                <a class="rounded-md bg-white inline-block py-2 px-4 font-semibold {{$tab == 'material' ? 'bg-blue-400 text-white':''}}"
+                    href="/masterdata/material">Material</a>
+            </li>
         </ul>
     </div>
     <br>

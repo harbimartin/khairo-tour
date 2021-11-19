@@ -4,9 +4,9 @@
         $title = "Master Budget Version";
         $column = json_encode([
             'budget_version_code'=>[ 'name'=>"Name", 'type'=>'String', 'req'=> true ],
-            'divisions_id'=>[ 'name'=>"Divisi", 'type'=>'Select', 'api'=>'division', 'val'=>'name' , 'req'=> true ],
-            'budget_period_id'=>[ 'name'=>"Budget Period", 'type'=>'Select', 'api'=>'budget_period', 'val'=>'budget_period_desc',  'req'=> true ],
-            'budget_version_type'=>[ 'name'=>"Budget Type", 'type'=>'Select', 'api'=>'budget_type', 'val'=>'version_type', 'req'=> true ],
+            'divisions_id'=>[ 'name'=>"Divisi", 'type'=>'Select', 'api'=>'division', 'val'=>['name'] , 'req'=> true ],
+            'budget_period_id'=>[ 'name'=>"Budget Period", 'type'=>'Select', 'api'=>'budget_period', 'val'=>['budget_period','budget_period_desc'],  'req'=> true ],
+            'budget_version_type'=>[ 'name'=>"Budget Type", 'type'=>'Select', 'api'=>'budget_type', 'val'=>['version_type'], 'req'=> true ],
             'budget_name'=>[ 'name'=>'Deskripsi Budget', 'type'=>'String', 'full'=>true, 'req'=> false ],
             'budget'=>[ 'name'=>"Amount Budget", 'type'=>'Number', 'full'=>true, 'req'=> false ],
         ]);

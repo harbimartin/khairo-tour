@@ -18,7 +18,7 @@ class Update extends Component
      *
      * @return void
      */
-    public function __construct($idk = 'id', $column, $url, $title, $data, $select = '', $error = ''){
+    public function __construct($column, $url, $title, $data, $select = '',$idk = 'id',  $error = ''){
         $this->idk = $idk;
         $this->column = $column;
         $this->title = $title;

@@ -15,8 +15,7 @@
         </svg>
       <span class="my-2 font-semibold"> Kembali</span>
     </a>
-    {{-- {{$datas}}<br>
-    {{$column}} --}}
+    {{-- {{$datas}}<br> --}}
     {{-- {{request()->url()}}<br>
     {{$error}} --}}
     <form class="container rounded-lg shadow my-8 py-4 px-6 bg-white" action="{{request()->url().'/'.$id}}" method="POST">
@@ -39,7 +38,15 @@
                             <select id="{{$key}}" name="{{$key}}" type="number" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
                                 <option disabled selected class="text-gray-400"></option>
                                 @foreach ($select[$param->api] as $item)
-                                    <option value={{$item['id']}} {{$datas[$key]==$item['id'] ? 'selected': ''}}>{{$item[$param->val]}}</option>
+                                    <option value={{$item['id']}} {{$datas[$key]==$item['id'] ? 'selected': ''}}>
+                                        @foreach($param->val as $on => $val)
+                                            @if($on == 0)
+                                                {{$item[$val]}}
+                                            @else
+                                                - {{$item[$val]}}
+                                            @endif
+                                        @endforeach
+                                    </option>
                                 @endforeach
                             </select>
                         @break

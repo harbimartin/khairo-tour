@@ -14,7 +14,7 @@
             [
                 'no' => 1,
                 'kode' => 'R-NP-115-15-001',
-                'tipe' => "PR Services",
+                'tipe' => "MRA Services",
                 'nama' => "Biaya Labour Supply",
                 'anggaran' => "1,862,796,981.00",
                 'available' => "1,862,796,981.00",

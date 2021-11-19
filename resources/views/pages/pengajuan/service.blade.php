@@ -6,7 +6,7 @@
             'budget_version_code'=>[ 'name'=>"Service Line", 'type'=>'Number', 'req'=> true ],
             'quantity'=>[ 'name'=>"Quantity", 'type'=>'Number', 'req'=> true ],
             'budget_name'=>[ 'name'=>'Short Text', 'type'=>'TextArea', 'full'=>true, 'req'=> false ],
-            'prd'=>[ 'name'=>"Unit of Measure", 'type'=>'Select', 'api'=>'umeasure', 'val'=>'name', 'req'=> true ],
+            'prd'=>[ 'name'=>"Unit of Measure", 'type'=>'TextSel', 'api'=>'umeasure', 'val'=>['unit_measurement','unit_measurement_desc'], 'req'=> true ],
             'budget'=>[ 'name'=>"Price Unit", 'type'=>'Number', 'req'=> false ],
         ]);
         $column_table = json_encode([

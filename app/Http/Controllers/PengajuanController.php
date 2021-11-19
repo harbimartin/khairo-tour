@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\BudgetPeriod;
 use App\BudgetVersion;
+use App\SapDocType;
 use Illuminate\Http\Request;
 
 class PengajuanController extends Controller
@@ -26,7 +27,7 @@ class PengajuanController extends Controller
         //     }
         // }
         $select = [
-            'pr_doc' => [['id'=>1,'name'=>'Ceritanya Type 1'],['id'=>2, 'name'=>'Ceritanya Type 2']],
+            'pr_doc' => SapDocType::where('status',1)->get(),
             'budget_version' => BudgetVersion::where('status', 1)->get(),
         ];
         return view('pages.pengajuan', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);

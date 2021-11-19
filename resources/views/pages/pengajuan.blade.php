@@ -3,9 +3,9 @@
         <?php
             $title = "Header Pengajuan MRA";
             $column = json_encode([
-                'tujuan'=>[ 'name'=>"PR Date", 'type'=>'Date', 'req'=> false ],
-                'prd'=>[ 'name'=>"PR Document", 'type'=>'Select', 'api'=>'pr_doc', 'val'=>'name', 'req'=> true ],
-                'bt'=>[ 'name'=>"Budget Version", 'type'=>'Select', 'api'=>'budget_version', 'val'=>'budget_name', 'req'=> true ],
+                'tujuan'=>[ 'name'=>"MRA Date", 'type'=>'Date', 'req'=> false ],
+                'prd'=>[ 'name'=>"MRA Document", 'type'=>'Select', 'api'=>'pr_doc', 'val'=>['doc_type','doc_type_desc'], 'req'=> true ],
+                'bt'=>[ 'name'=>"Budget Version", 'type'=>'Select', 'api'=>'budget_version', 'val'=>['budget_name'], 'req'=> true ],
                 'ht'=>[ 'name'=>'Header Text', 'type'=>'TextArea', 'full'=>true, 'req'=> false ],
                 'rab'=>[ 'name'=>"Upload RAB", 'type'=>'Upload', 'val'=>'name', 'full'=>true, 'req'=> true , 'allow'=> ['pdf']],
             ]);

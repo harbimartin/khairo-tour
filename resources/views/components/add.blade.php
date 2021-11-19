@@ -1,24 +1,70 @@
 <div class="px-6">
     <form class="container rounded-lg shadow my-8 py-4 px-6 bg-white" action="{{request()->url()}}" method="POST">
         <h1 class="border-b text-2xl pb-2 border-gray-200">{{$title}}</h1>
-        {{-- {{request()->url()}}<br>
-        {{$error}} --}}
+        {{-- {{request()->url()}}<br> --}}
+        {{$error}}
         <div class="grid grid-cols-2 gap-4 p-5">
             @csrf
             @foreach (json_decode($column) as $key => $param)
                 <div class="inline-flex grid {{ isset($param->full) ? 'grid-cols-6 col-span-2':'grid-cols-3'}}">
                     <label for="{{$key}}" class="mt-1">{{$param->name}}</label>
                     @switch($param->type)
+                        @case('Reference')
+                            <input readonly
+                                id="{{$key}}"
+                                name="{{$key}}"
+                                value-from="{{$param->key}}"
+                                based="{{$param->val}}"
+                                type="text"
+                                class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"
+                            />
+                            {{-- <div v-html="document.getElementById('2').value"></div> --}}
+                        @break
                         @case('String')
                             <input id="{{$key}}" name="{{$key}}" type="text" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                         @break
                         @case('Number')
                             <input id="{{$key}}" name="{{$key}}" type="number" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                         @break
-                        @case('Select')
-                            <select id="{{$key}}" name="{{$key}}" type="number" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                        @case('TextSel')
+                            <input v-on:change="inputSetUp('{{$key}}',$event)" type="text" list="datalist_{{$key}}" placeholder="Pilih {{$param->name}}" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                            <datalist id="datalist_{{$key}}">
                                 @foreach ($select[$param->api] as $item)
-                                    <option value={{$item['id']}}>{{$item[$param->val]}}</option>
+                                    <option
+                                        @isset($param->share)
+                                            data-item='@foreach($param->share as $ind => $share){{$ind==0?"{":","}}"{{$share}}":"{{$item[$share]}}"@endforeach}'
+                                        @endisset
+                                        {{-- data-item="[
+                                        @isset($param->share)
+                                            @foreach ($param->share as $share)
+                                               {{$share}}={{$item[$share]}},
+                                            @endforeach
+                                        @endisset
+                                        ]"
+                                        {{-- data-item="{
+                                            {{array_intersect_key($item,array_flip($param->share))}}
+                                        }" --}}
+                                        {{-- data-item="{{$item}}" --}}
+                                        data-value="{{$item->id}}"
+                                        value="@foreach($param->val as $kk => $val)@if($kk == 0){{$item[$val]}}@else - {{$item[$val]}}@endif
+@endforeach">
+                                    </option>
+                                @endforeach
+                            </datalist>
+                            <input id="{{$key}}" name="{{$key}}" hidden>
+                        @break
+                        @case('Select')
+                            <select id="{{$key}}" name="{{$key}}" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                                @foreach ($select[$param->api] as $item)
+                                    <option value={{$item['id']}}>
+                                        @foreach($param->val as $key => $val)
+                                            @if($key == 0)
+                                                {{$item[$val]}}
+                                            @else
+                                                - {{$item[$val]}}
+                                            @endif
+                                        @endforeach
+                                    </option>
                                 @endforeach
                             </select>
                         @break

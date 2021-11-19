@@ -4,6 +4,13 @@ namespace App\Http\Controllers;
 
 use App\BudgetPeriod;
 use App\BudgetVersion;
+use App\SapAccount;
+use App\SapCurrency;
+use App\SapDocType;
+use App\SapItemCategory;
+use App\SapMaterial;
+use App\SapPurchaseGroup;
+use App\SapUnitMeasure;
 use Illuminate\Http\Request;
 
 class PengajuanItemController extends Controller
@@ -26,16 +33,14 @@ class PengajuanItemController extends Controller
         //     }
         // }
         $select = [
-            'pr_doc' => [['id'=>1,'name'=>'Ceritanya Type 1'],['id'=>2, 'name'=>'Ceritanya Type 2']],
-            'budget_version' => BudgetVersion   ::where('status', 1)->get(),
-
-            'pgroup' => [['id'=>1,'name'=>'Ceritanya PGROUP 1'],['id'=>2, 'name'=>'Ceritanya PGROUP 2']],
-            'mnumber' => [['id'=>1,'name'=>'VII'],['id'=>2, 'name'=>'IV'],['id'=>3, 'name'=>'X'],['id'=>4, 'name'=>'XI']],
-            'mgroup' => [['id'=>1,'name'=>'Cair'],['id'=>2, 'name'=>'Padat'],['id'=>2, 'name'=>'Gas']],
-            'umeasure' => [['id'=>1,'name'=>'Unit'],['id'=>2, 'name'=>'Ls']],
-            'icategory' => [['id'=>1,'name'=>'Category 1'],['id'=>2, 'name'=>'Category 2']],
-            'assign' => [['id'=>1,'name'=>'Assignment 1'],['id'=>2, 'name'=>'Assignment 2']],
-            'currency' => [['id'=>1,'name'=>'IDR'],['id'=>2, 'name'=>'USD']],
+            'pr_doc' => SapDocType::where('status',1)->get(),
+            'budget_version' => BudgetVersion::where('status', 1)->get(),
+            'pgroup' => SapPurchaseGroup::where('status',1)->get(),
+            'mnumber' => SapMaterial::where('status',1)->get(),
+            'umeasure' => SapUnitMeasure::where('status',1)->get(),
+            'icategory' => SapItemCategory::where('status',1)->get(),
+            'assign' => SapAccount::where('status',1)->get(),
+            'currency' => SapCurrency::where('status',1)->get(),
         ];
         return view('pages.pengajuan.item', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);
     }

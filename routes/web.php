@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class,'view_index']);
 Route::resource('/masterdata/period', 'MasterPeriodController');
+Route::resource('/masterdata/material', 'MasterMaterialController');
 Route::resource('/masterdata/type', 'MasterTypeController');
 Route::resource('/masterdata', 'MasterController');
 Route::resource('/pengajuan/item', 'PengajuanItemController');
