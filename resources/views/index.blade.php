@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
     <script src="https://unpkg.com/vue"></script>
+    {{-- <script src="https://cdn.ckeditor.com/4.17.1/standard/ckeditor.js"></script> --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
     <title>E-Budgeting PT. KBS</title>
 </head>
@@ -41,6 +42,12 @@
                         <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
                             <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_data.png')}}" alt="menu_data">
                             <p class="my-auto ml-3 text-sm font-semibold">Pengajuan MRA</p>
+                        </div>
+                    </a>
+                    <a href="/pengajuan_head">
+                        <div class="inline-flex w-full hover:bg-gray-100 md:px-3 py-3 cursor-pointer">
+                            <img class="h-5 w-5 my-auto" src="{{url('/assets/menu_data.png')}}" alt="menu_data">
+                            <p class="my-auto ml-3 text-sm font-semibold">Pengajuan MRA 2</p>
                         </div>
                     </a>
                     <a href="/overview">

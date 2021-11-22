@@ -13,6 +13,7 @@ Route::resource('/pengajuan/item', 'PengajuanItemController');
 Route::resource('/pengajuan/service', 'PengajuanServiceController');
 Route::resource('/pengajuan/assignment', 'PengajuanAssignController');
 Route::resource('/pengajuan', 'PengajuanController');
+Route::resource('/pengajuan_head', 'PengajuanHeadController');
 Route::resource('/overview', 'OverviewController');
 Route::resource('/persetujuan', 'PersetujuanController');
 Route::get('/pengalihan_anggaran', [ViewController::class, 'pengalihan_angg']);

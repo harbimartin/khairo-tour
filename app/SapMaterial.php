@@ -30,6 +30,6 @@ class SapMaterial extends Model
         'status'
     ];
     public function uoms(){
-        return $this->hasOne(SapUnitMeasure::class, 'id', 'uom')->select('id','unit_measurement');
+        return $this->hasOne(SapUnitMeasure::class, 'id', 'uom')->select('id','unit_measurement', 'unit_measurement_desc');
     }
 }

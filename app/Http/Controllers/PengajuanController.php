@@ -27,7 +27,7 @@ class PengajuanController extends Controller
         //     }
         // }
         $select = [
-            'pr_doc' => SapDocType::where('status',1)->get(),
+            'pr_doc' => $request->mra ? SapDocType::find($request->mra) : SapDocType::where('status',1)->get(),
             'budget_version' => BudgetVersion::where('status', 1)->get(),
         ];
         return view('pages.pengajuan', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);

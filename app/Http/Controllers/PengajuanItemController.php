@@ -41,6 +41,13 @@ class PengajuanItemController extends Controller
             'icategory' => SapItemCategory::where('status',1)->get(),
             'assign' => SapAccount::where('status',1)->get(),
             'currency' => SapCurrency::where('status',1)->get(),
+
+
+            'pr_doc' => SapDocType::where('status', 1)->get(),
+            'budget_version' => BudgetVersion::where('status', 1)->get(),
+            'glaccount' => SapAccount::where('status', 1)->get(),
+            'costcenter' => [['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
+            'internal' => [['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
         ];
         return view('pages.pengajuan.item', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);
     }

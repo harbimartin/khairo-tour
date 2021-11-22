@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\BudgetPeriod;
 use App\BudgetVersion;
+use App\SapAccount;
+use App\SapCurrency;
 use App\SapDocType;
 use App\SapUnitMeasure;
 use Illuminate\Http\Request;
@@ -30,7 +32,13 @@ class PengajuanServiceController extends Controller
         $select = [
             'umeasure' => SapUnitMeasure::where('status', 1)->get(),
             'pr_doc' => SapDocType::where('status', 1)->get(),
+            'currency' => SapCurrency::where('status',1)->get(),
             'budget_version' => BudgetVersion::where('status', 1)->get(),
+
+            'items' => [],
+            'glaccount' => SapAccount::where('status', 1)->get(),
+            'costcenter' => [['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
+            'internal' => [['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
         ];
         return view('pages.pengajuan.service', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);
     }

@@ -6,7 +6,7 @@
         <div class="grid grid-cols-2 gap-4 p-5">
             @csrf
             @foreach (json_decode($column) as $key => $param)
-                <div class="inline-flex grid {{ isset($param->full) ? 'grid-cols-6 col-span-2':'grid-cols-3'}}">
+                <div @isset($param->if)if="{{json_encode($param->if)}}"@endisset class="inline-flex grid @isset($param->class){{$param->class}}@endisset {{ isset($param->full) ? 'grid-cols-6 col-span-2':'grid-cols-3'}}">
                     <label for="{{$key}}" class="mt-1">{{$param->name}}</label>
                     @switch($param->type)
                         @case('Reference')
@@ -27,12 +27,27 @@
                             <input id="{{$key}}" name="{{$key}}" type="number" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                         @break
                         @case('TextSel')
-                            <input v-on:change="inputSetUp('{{$key}}',$event)" type="text" list="datalist_{{$key}}" placeholder="Pilih {{$param->name}}" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                            <input @isset($param->share)v-on:change="inputSetUp('{{$key}}',$event)"@endisset type="text" list="datalist_{{$key}}" placeholder="Pilih {{$param->name}}" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
                             <datalist id="datalist_{{$key}}">
                                 @foreach ($select[$param->api] as $item)
                                     <option
                                         @isset($param->share)
-                                            data-item='@foreach($param->share as $ind => $share){{$ind==0?"{":","}}"{{$share}}":"{{$item[$share]}}"@endforeach}'
+                                            <?php
+                                                $txt = '{';
+                                                $i = 0;
+                                                foreach($param->share as $column => $share){
+                                                    if ($share){
+                                                        $txt = $txt.($i>0?'","':'"').$column.'":"';
+                                                        foreach($share as $k => $v){
+                                                            $txt = $txt.($k==0?'':' - ').$item[$column][$v];
+                                                        }
+                                                    }else
+                                                        $txt = $txt.($i>0?'","':'"').$column.'":"'.$item[$column];
+                                                    $i++;
+                                                }
+                                                $txt = $txt.'"}';
+                                            ?>
+                                            data-item="{{$txt}}"
                                         @endisset
                                         {{-- data-item="[
                                         @isset($param->share)
@@ -53,10 +68,23 @@
                             </datalist>
                             <input id="{{$key}}" name="{{$key}}" hidden>
                         @break
+                        @case('Disable')
+                            <?php
+                                $txt = '';
+                                foreach($param->val as $kk => $val){
+                                    $txt = $txt.($kk?' - ':'').$select[$param->api][$val];
+                                }
+                            ?>
+                            <input disabled id="{{$key}}" name="{{$key}}" value="{{$txt}}" type="text" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                        @break
                         @case('Select')
-                            <select id="{{$key}}" name="{{$key}}" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                            <select id="{{$key}}" name="{{$key}}" @isset($param->share)v-on:change="inputSetIf('{{$key}}',$event)"@endisset class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
                                 @foreach ($select[$param->api] as $item)
-                                    <option value={{$item['id']}}>
+                                    <option
+                                        @isset($param->share)
+                                            share="{{$item[$param->share]}}"
+                                        @endisset
+                                        value={{$item['id']}}>
                                         @foreach($param->val as $key => $val)
                                             @if($key == 0)
                                                 {{$item[$val]}}
@@ -92,7 +120,16 @@
                             </script>
                         @break
                         @case('Date')
-                            <input id="{{$key}}" name="{{$key}}" type="date" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                            @isset($param->def)
+                                <?php
+                                    $date = new DateTime();
+                                    $date->modify("+".$param->def." day");
+                                    $default = $date->format("Y-m-d");
+                                ?>
+                                <input id="{{$key}}" name="{{$key}}" type="date" value="{{$default}}" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                            @else
+                                <input id="{{$key}}" name="{{$key}}" type="date" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                            @endisset
                         @break
                         @default
                     @endswitch

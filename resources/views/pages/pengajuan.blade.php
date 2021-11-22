@@ -2,13 +2,18 @@
     @section('content')
         <?php
             $title = "Header Pengajuan MRA";
-            $column = json_encode([
+            $column = [
                 'tujuan'=>[ 'name'=>"MRA Date", 'type'=>'Date', 'req'=> false ],
-                'prd'=>[ 'name'=>"MRA Document", 'type'=>'Select', 'api'=>'pr_doc', 'val'=>['doc_type','doc_type_desc'], 'req'=> true ],
+                'prd'=>[ 'name'=>"MRA Document", 'type'=>'TextSel', 'api'=>'pr_doc', 'val'=>['doc_type','doc_type_desc'], 'req'=> true ],
                 'bt'=>[ 'name'=>"Budget Version", 'type'=>'Select', 'api'=>'budget_version', 'val'=>['budget_name'], 'req'=> true ],
                 'ht'=>[ 'name'=>'Header Text', 'type'=>'TextArea', 'full'=>true, 'req'=> false ],
                 'rab'=>[ 'name'=>"Upload RAB", 'type'=>'Upload', 'val'=>'name', 'full'=>true, 'req'=> true , 'allow'=> ['pdf']],
-            ]);
+            ];
+            if (request()->mra){
+                $column['prd']['type'] = 'Disable';
+                // $column['prd']['state'] = request()->mra;
+            }
+            $column = json_encode($column);
             $url = 'jejeje';
         ?>
         @isset($tab)
@@ -48,10 +53,10 @@
                     <a class="rounded-md bg-white inline-block py-2 px-4 font-semibold {{$tab == 'service' ? 'bg-blue-400 text-white':''}}"
                         href="/pengajuan/service?hid={{$id}}">Service</a>
                 </li>
-                <li class="-mb-px mr-1">
+                {{-- <li class="-mb-px mr-1">
                     <a class="rounded-md bg-white inline-block py-2 px-4 font-semibold {{$tab == 'assignment' ? 'bg-blue-400 text-white':''}}"
                         href="/pengajuan/assignment?hid={{$id}}">Account Assignment</a>
-                </li>
+                </li> --}}
             </ul>
             @yield('md_content')
         @else
