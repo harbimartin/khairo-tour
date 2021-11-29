@@ -4,25 +4,42 @@
         $title = 'MEMO REALISASI ANGGARAN';
         $code = 'MRA';
         $column = [
-            'no_item'=> [ 'name'=>'Item<br>No.', 'align'=>'center', 'type'=>'Number'],
-            'desc'=> [ 'name'=>'Description Barang / Jasa' ],
-            'deliv'=> [ 'name'=>'Deliv. Date', 'align'=>'center', 'type'=>'Date'],
-            'pgr'=> [ 'name'=>'PGr.', 'align'=>'center', 'type'=>'SString', 'child'=>'code'],
-            'qty'=> [ 'name'=>'Qty', 'align'=>'center', 'type'=>'Float'],
-            'uom'=> [ 'name'=>'UoM', 'align'=>'center', 'type'=>'SString', 'child'=>'code'],
-            'cur'=> [ 'name'=>'Cur', 'align'=>'center', 'type'=>'SString', 'child'=>'code'],
-            'eprice'=> [ 'name'=>'Price', 'align'=>'right', 'type'=>'Float', 'child'=>'code'],
-            'uprice'=> [ 'name'=>'Unit<br>Price', 'align'=>'center', 'type'=>'Number'],
+            'seq_no'=> [ 'name'=>'Item<br>No.', 'align'=>'center', 'type'=>'Number'],
+            'short_text'=> [ 'name'=>'Description Barang / Jasa' ],
+            'delivery_date_exp'=> [ 'name'=>'Deliv. Date', 'align'=>'center', 'type'=>'Date'],
+            'purchase_groups'=> [ 'name'=>'PGr.', 'align'=>'center', 'type'=>'SString', 'child'=>'purchase_group'],
+            'qty_proposed'=> [ 'name'=>'Qty', 'align'=>'center', 'type'=>'Float'],
+            'uom'=> [ 'name'=>'UoM', 'align'=>'center', 'type'=>'SString', 'child'=>'unit_measurement'],
+            'currencies'=> [ 'name'=>'Cur', 'align'=>'center', 'type'=>'SString', 'child'=>'currency'],
+            'price_proposed'=> [ 'name'=>'Price', 'align'=>'right', 'type'=>'Float', 'child'=>'code'],
+            'price_unit'=> [ 'name'=>'Unit<br>Price', 'align'=>'center', 'type'=>'Number'],
             'amount'=> [ 'name'=>'Amount', 'align'=>'center', 'type'=>'Float'],
-            'gl_acc'=> [ 'name'=>'G/L. Account'],
-            'costc'=> [ 'name'=>'Cost Center', 'align'=>'center'],
-            'iowo'=> [ 'name'=>'IO / WO', 'align'=>'center'],
+            'gl_accounts'=> [ 'name'=>'G/L. Account'],
+            'cost_centers'=> [ 'name'=>'Cost Center'],
+            'internal_orders'=> [ 'name'=>'IO / WO'],
         ]
         // foreach($data->items as $item){
         //     $item['amount'] = $item['eprice'] * $item['uprice'];
         // }
     ?>
-    <div class="px-3">
+    <a
+        class="inline-flex rounded-3xl border px-3 py-1 bg-red-900 hover:bg-red-400 transition ml-5 cursor-pointer text-white"
+        href="{{url('/api/purchase_requisitions')}}"
+        target="_blank"
+    >
+        Click Here to Open Old Return
+    </a>
+    <a
+        class="inline-flex rounded-3xl border px-3 py-1 bg-blue-900 hover:bg-blue-400 transition mr-5 cursor-pointer text-white"
+        target="_blank"
+        href="{{url('/api/budget_detail?id='.request()->id)}}"
+    >
+        Click Here to Open New Ways
+    </a>
+    <form action="{{request()->url().'/'.request()->id}}" method="POST"  class="px-3">
+        @csrf
+        @method('PUT')
+        <input class="hidden" name="status_id" value="{{$status_id}}"/>
         <div class="absolute m-4">
             <a
             class="inline-flex rounded-3xl border px-3 bg-gray-500 hover:bg-blue-400 transition mr-5 cursor-pointer text-white"
@@ -38,7 +55,7 @@
         <div class="container rounded-lg shadow my-3 py-7 px-3 bg-white">
             <img src="{{url('/assets/logo.png')}}" width="200px" class="mx-auto">
             <h1 class="border-gray-200 mt-5 underline font-bold text-center">{{$title}}</h1>
-            <p class="text-center text-sm">No. {{$code}}: {{$data->no_mra}}</p>
+            <p class="text-center text-sm">No. {{$code}}: {{$data->budget_code}}</p>
 
             <div class="flex flex-col mt-6">
                 <div class="-my-2 overflow-x-auto sm:-mx-3">
@@ -92,19 +109,6 @@
                                                     @case('Direct')
                                                             <a href="{{$param->url.'/view'}}" class="text-indigo-600 hover:text-indigo-900">View</a>
                                                         @break
-                                                    @case('Toggle')
-                                                        <form action="{{Request::url().'/'.$item['id']}}" method="POST">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input id="{{$key}}" name="{{$key}}" value="{{$item[$key]?0:1}}" hidden>
-                                                            <button type="submit" class="text-indigo-600 hover:text-indigo-900">{{$item[$key] ? 'Nonaktifkan' : 'Aktifkan'}}</button>
-                                                        </form>
-                                                        @break
-                                                    @case('Post')
-                                                        <form action="{{Request::url().$param->url}}" method="POST">
-                                                            <button type="submit" class="text-indigo-600 hover:text-indigo-900">{{$param->name}}</button>
-                                                        </form>
-                                                        @break
                                                     @default
                                                             <div class="text-gray-900 text-red-500">{{$item[$key]}}</div>
                                                             <small>{{$param['type']}}</small>
@@ -112,34 +116,35 @@
                                                 @endswitch
                                             @else
                                                 @switch($key)   {{-- $item[$key] --}}
-                                                    @case('desc')
-                                                        @isset($item["desc"])
+                                                    @case('short_text')
+                                                        @isset($item["short_text"])
                                                             <div class="text-sm text-gray-900">{{ $item[$key] }}</div>
                                                         @endisset
                                                         @break
-                                                    @case('gl_acc')
-                                                        @isset($item["assign"]["gla"])
-                                                            <div class="text-sm text-gray-900">{{$item["assign"]['gla']['no']}}</div>
+                                                    @case('gl_accounts')
+                                                        {{-- @isset($item["gl_accounts"]["gl_account"]) --}}
+                                                            <div class="text-sm text-gray-900">{{$item["gl_accounts"]['gl_account']}}</div>
                                                             <div class="text-xs text-gray-900">
-                                                                {{$item["assign"]['gla']['title']}}<br>
-                                                                - {{$item["assign"]['gla']['point']}}
+                                                                {{-- {{$item["assign"]['gla']['title']}}<br>
+                                                                - {{$item["assign"]['gla']['point']}} --}}
+                                                                {{$item["gl_accounts"]["gl_account_desc"]}}
+                                                            </div>
+                                                        {{-- @endisset --}}
+                                                        @break
+                                                    @case('cost_centers')
+                                                        @isset($item["cost_centers"])
+                                                            <div class="text-sm text-gray-900">{{$item["cost_centers"]['cost_center']}}</div>
+                                                            <div class="text-xs text-gray-900">
+                                                                {{$item["cost_centers"]['cost_center']}}
                                                             </div>
                                                         @endisset
                                                         @break
-                                                    @case('costc')
-                                                        @isset($item["assign"]["cc"])
-                                                            <div class="text-sm text-gray-900">{{$item["assign"]['cc']['no']}}</div>
-                                                            <div class="text-xs text-gray-900">
+                                                    @case('internal_orders')
+                                                        @isset($item["internal_orders"])
+                                                            <div class="text-sm text-gray-900">{{$item["internal_orders"]['io_code']}}</div>
+                                                            {{-- <div class="text-xs text-gray-900">
                                                                 {{$item["assign"]['cc']['division']}}
-                                                            </div>
-                                                        @endisset
-                                                        @break
-                                                    @case('iowo')
-                                                        @isset($item["assign"]["io"])
-                                                            <div class="text-sm text-gray-900">{{$item["assign"]['cc']['no']}}</div>
-                                                            <div class="text-xs text-gray-900">
-                                                                {{$item["assign"]['cc']['division']}}
-                                                            </div>
+                                                            </div> --}}
                                                         @endisset
                                                         @break
                                                     @default
@@ -187,19 +192,6 @@
                                                             @case('Direct')
                                                                     <a href="{{$param->url.'/view'}}" class="text-indigo-600 hover:text-indigo-900">View</a>
                                                                 @break
-                                                            @case('Toggle')
-                                                                <form action="{{Request::url().'/'.$serv['id']}}" method="POST">
-                                                                    @csrf
-                                                                    @method('PUT')
-                                                                    <input id="{{$key}}" name="{{$key}}" value="{{$serv[$key]?0:1}}" hidden>
-                                                                    <button type="submit" class="text-indigo-600 hover:text-indigo-900">{{$serv[$key] ? 'Nonaktifkan' : 'Aktifkan'}}</button>
-                                                                </form>
-                                                                @break
-                                                            @case('Post')
-                                                                <form action="{{Request::url().$param->url}}" method="POST">
-                                                                    <button type="submit" class="text-indigo-600 hover:text-indigo-900">{{$param->name}}</button>
-                                                                </form>
-                                                                @break
                                                             @default
                                                                     <div class="text-red-500">{{$serv[$key]}}</div>
                                                                     <small>{{$param['type']}}</small>
@@ -208,9 +200,9 @@
                                                     @endisset
                                                 @endisset
                                                 @switch($key)   {{-- $item[$key] --}}
-                                                    @case('desc')
-                                                        @isset($item["desc"])
-                                                            <div class="text-sm">[{{$serv['no']}}] {{ $serv[$key] }}</div>
+                                                    @case('short_text')
+                                                        @isset($item["short_text"])
+                                                            <div class="text-sm">[{{$serv['seq_no']}}] {{ $serv[$key] }}</div>
                                                         @endisset
                                                         @break
                                                     @default
@@ -239,15 +231,15 @@
             </div>
             <div class="mt-6 ml-6 w-1/3">
                 <span class="text-gray-500 font-semibold">Keterangan :</span><br>
-                <div class="text-sm text-gray-800">{{$data->text_header}}</div>
+                <div class="text-sm text-gray-800">{{$data->note_header}}</div>
             </div>
             <div class="mt-6 w-1/3 text-sm ml-10">
                 @foreach ($data->items as $item)
                     <div class="ml-10 inline-flex text-gray-600">
-                        <span class="mr-1 font-semibold">{{$item['no_item']}}.</span>
+                        <span class="mr-1 font-semibold">{{$item['seq_no']}}.</span>
                         <div class="mr-2">Specification&nbsp;:&nbsp;</div>
-                        <div class="text-gray-800">{{$item['spec']}}</div>
-                    </div>
+                        <div class="text-gray-800">{{$item['note_item']}}</div>
+                    </div><br>
                 @endforeach
             </div>
             <div class="flex">
@@ -258,32 +250,35 @@
                         type="button"
                         value="Reject"
                     />
-                    <input
+                    <button
                         class="flex rounded border px-4 py-2 bg-green-500 hover:bg-green-600 ml-auto mr-5 cursor-pointer text-white font-semibold"
-                        type="button"
-                        value="Verifikasi Anggaran"
-                    />
+                        type="submit"
+                        name="type"
+                        value="verifikasi"
+                    >
+                    {{$purpose}}
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- This example requires Tailwind CSS v2.0+ -->
-    <div v-show="onReject" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <form action="{{request()->url().'/'.request()->id}}" method="POST" v-show="onReject" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        @csrf
+        @method('PUT')
       <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <!--
-          Background overlay, show/hide based on modal state.
-
-          Entering: "ease-out duration-300"
-            From: "opacity-0"
-            To: "opacity-100"
-          Leaving: "ease-in duration-200"
-            From: "opacity-100"
-            To: "opacity-0"
+        coba nanti
+          Masuk: "ease-out duration-300"
+            dari: "opacity-0"
+            jadi: "opacity-100"
+          Keluar: "ease-in duration-200"
+            dari: "opacity-100"
+            jadi: "opacity-0"
         -->
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
 
-        <!-- This element is to trick the browser into centering the modal contents. -->
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
           <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -300,16 +295,17 @@
                 </h3>
                 <div class="mt-2">
                   <p class="text-sm text-gray-600">
-                    Apa anda yakin ingin membatalkan Memo Realisasi Anggaran No. {{$code}}: {{$data->no_mra}} ?
+                    Apa anda yakin ingin membatalkan Memo Realisasi Anggaran No. {{$code}}: {{$data->budget_code}} ?
                   </p>
                 </div>
                 <div class="my-2 text-sm text-gray-500 font-semibold">Alasan Reject : </div>
-                <textarea class="border rounded shadow w-full text-sm px-2 py-1" placeholder="Tulis alasan anda menolak anggaran ini"></textarea>
-              </div>
+                <textarea id="reason" name="reason" class="border rounded shadow w-full text-sm px-2 py-1" placeholder="Tulis alasan anda menolak anggaran ini"></textarea>
+              <input class="hidden" name="status_id" value="{{$status_id}}"/>
+                </div>
             </div>
           </div>
           <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button v-on:click="onReject = false" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+            <button v-on:click="onReject = false" type="submit" name="type" value="reject" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
               Reject
             </button>
             <button v-on:click="onReject = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
@@ -318,5 +314,5 @@
           </div>
         </div>
       </div>
-    </div>
+    </form>
 @endsection

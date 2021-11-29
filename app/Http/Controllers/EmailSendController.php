@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Budget;
-use App\BudgetPeriod;
+use App\EmailSend;
 use Illuminate\Http\Request;
 
-class OverviewController extends Controller
+class EmailSendController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, $error = ''){
+    public function index(Request $request)
+    {
         if ($length = $request->el)
             $length = 10;
-        $data = Budget::latest('created')->with(['doc_types','budget_versions'])->withCount('items')->get();
-        return view('pages.overview', [ 'data' => $data, 'error'=>$error]);
+        if ($request->id){
+            $data = EmailSend::where('id',$request->id)->first();
+        }else{
+            $data = EmailSend::latest()->get();
+        }
+        return view('pages.emails', [ 'data' => $data ]);
     }
 
     /**
@@ -44,10 +48,10 @@ class OverviewController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\EmailSend  $emailSend
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(EmailSend $emailSend)
     {
         //
     }
@@ -55,10 +59,10 @@ class OverviewController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\EmailSend  $emailSend
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(EmailSend $emailSend)
     {
         //
     }
@@ -67,10 +71,10 @@ class OverviewController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\EmailSend  $emailSend
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, EmailSend $emailSend)
     {
         //
     }
@@ -78,10 +82,10 @@ class OverviewController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\EmailSend  $emailSend
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(EmailSend $emailSend)
     {
         //
     }

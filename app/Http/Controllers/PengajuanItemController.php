@@ -2,15 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Budget;
+use App\BudgetItem;
 use App\BudgetPeriod;
 use App\BudgetVersion;
+use App\InternalOrder;
+use App\InternalOrderRpt;
 use App\SapAccount;
+use App\SapCostCenter;
 use App\SapCurrency;
 use App\SapDocType;
+use App\SapGlAccount;
 use App\SapItemCategory;
 use App\SapMaterial;
+use App\SapMaterialGroup;
 use App\SapPurchaseGroup;
 use App\SapUnitMeasure;
+use Exception;
 use Illuminate\Http\Request;
 
 class PengajuanItemController extends Controller
@@ -23,15 +31,19 @@ class PengajuanItemController extends Controller
     public function index(Request $request, $error = ''){
         if ($length = $request->el)
             $length = 10;
-        $data = '[]';
-        // if ($request->id)
-        //     $data = BudgetVersion::where('id',$request->id)->with(['period', 'division', 'type'])->first();
-        // else{
-        //     $data = BudgetVersion::latest('id')->with(['period', 'division', 'type'])->get();//->paginate($length);
-        //     foreach($data as $a){
-        //         $a['state'] = $a['status'] ? 'AKTIF' : 'NON-AKTIF';
-        //     }
-        // }
+        if ($request->id){
+            $data = BudgetItem::where('id',$request->id)->first();
+            $header = (object)['id'=>$data->t_budget_id];
+            $request['hid'] = $data->t_budget_id;
+        }else{
+            $data = BudgetItem::latest('id')->where('t_budget_id',$request->hid)->with(['purchase_groups', 'item_categories'])->get();
+            if ($request->hid){
+                $header = Budget::find($request->hid);
+                // if ($header->budget_versions->division_id != $_SESSION['ebudget_division_id'])
+                //     return "Maaf kamu tidak bisa mengakses Laman ini";
+            }else
+                return redirect(url('/pengajuan'));
+        }
         $select = [
             'pr_doc' => SapDocType::where('status',1)->get(),
             'budget_version' => BudgetVersion::where('status', 1)->get(),
@@ -41,15 +53,15 @@ class PengajuanItemController extends Controller
             'icategory' => SapItemCategory::where('status',1)->get(),
             'assign' => SapAccount::where('status',1)->get(),
             'currency' => SapCurrency::where('status',1)->get(),
-
+            'mgroup' => SapMaterialGroup::where('status', 1)->get(),
 
             'pr_doc' => SapDocType::where('status', 1)->get(),
             'budget_version' => BudgetVersion::where('status', 1)->get(),
-            'glaccount' => SapAccount::where('status', 1)->get(),
-            'costcenter' => [['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
-            'internal' => [['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
+            'glaccount' => SapGlAccount::where('status', 1)->get(),
+            'costcenter' => SapCostCenter::where('status',1)->get(),//[['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
+            'internal' => InternalOrderRpt::whereNull('t_budget_id')->orWhere('t_budget_id',$request->hid)->get()//[['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
         ];
-        return view('pages.pengajuan.item', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);
+        return view('pages.pengajuan.item', [ 'data' => $data , 'header' => $header,'select'=>$select, 'error'=>$error]);
     }
 
     /**
@@ -69,22 +81,42 @@ class PengajuanItemController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
-        // if ($validate = $this->validing($request->all(), [
-        //     'budget_version_code' => 'required',
-        //     'budget_period_id' => 'required',
-        //     'divisions_id' => 'required',
-        //     'budget_version_type' => 'required',
-        //     'budget_name' => 'required',
-        //     'budget' => 'required'
-        // ]))
-        //     return $this->index($request, $validate);
-        // try{
-        //     $request['status']=0;
-        //     BudgetVersion::create($request->toArray());
-        // }catch(Exception $th){
-        //     return $this->index($request, $th->getMessage());
-        // }
-        return redirect($request->url().'/item?hid='.'0');
+        $request['hid'] = $request->t_budget_id;
+        if ($validate = $this->validing($request->all(), [
+            'hid'=>'required',
+            'seq_no'=>'required',
+            'purchase_group'=>'required',
+            'item_category'=>'required',
+            'account_assignment'=>'required',
+            'request_date'=>'required',
+            'package_no'=>'required',
+            // 'short_text'=>'required',
+            // 'unit_qty'=>'required',
+            'qty_proposed'=>'required',
+            'price_proposed'=>'required',
+            'currency'=>'required',
+            'delivery_date_exp'=>'required',
+            'note_item'=>'required',
+        ]))
+            return $this->index($request, $validate);
+        try{
+            $request['t_budget_id'] = $request->hid;
+            $request['plant'] = "KBS1";
+            $request['item_status'] = "Draft";
+            $request['price_unit'] = "1";
+            if ($request->item_category == 3){
+                $request['short_text'] = $request->_short_text;
+                $request['material_group'] = $request->_material_group;
+                $request['unit_qty'] = $request->_unit_qty;
+            }
+            if ($request->account_assignment != 1){
+                $request['internal_order'] = null;
+            }
+            BudgetItem::create($request->toArray());
+        }catch(Exception $th){
+            return $this->index($request, $th->getMessage());
+        }
+        return redirect($request->url().'?hid='.$request->hid);
     }
 
     /**
@@ -116,9 +148,13 @@ class PengajuanItemController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, $id){
+        try{
+            BudgetItem::find($id)->update($request->toArray());
+        } catch(Exception $th){
+            return $this->index($request, $th->getMessage());
+        }
+        return redirect(dirname($request->url()));
     }
 
     /**
@@ -127,8 +163,9 @@ class PengajuanItemController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
-        //
+        BudgetItem::destroy($id);
+        return redirect($request->url);
     }
 }

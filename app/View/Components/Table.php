@@ -10,16 +10,18 @@ class Table extends Component
     public $datas;
     public $datef;
     public $import;
+    public $idk;
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($column, $datas, $datef = false, $import = false){
+    public function __construct($column, $datas, $datef = false, $import = false, $idk = 'id'){
         $this->column = $column;
         $this->datas = $datas;
         $this->datef = $datef;
         $this->import = $import;
+        $this->idk = $idk;
     }
 
     /**

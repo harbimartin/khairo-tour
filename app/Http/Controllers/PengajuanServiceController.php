@@ -2,13 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Budget;
+use App\BudgetItem;
 use App\BudgetPeriod;
+use App\BudgetService;
 use App\BudgetVersion;
+use App\InternalOrder;
+use App\InternalOrderRpt;
 use App\SapAccount;
+use App\SapCostCenter;
 use App\SapCurrency;
 use App\SapDocType;
+use App\SapGlAccount;
 use App\SapUnitMeasure;
+use Exception;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx\Rels;
 
 class PengajuanServiceController extends Controller
 {
@@ -20,27 +29,41 @@ class PengajuanServiceController extends Controller
     public function index(Request $request, $error = ''){
         if ($length = $request->el)
             $length = 10;
-        $data = '[]';
-        // if ($request->id)
-        //     $data = BudgetVersion::where('id',$request->id)->with(['period', 'division', 'type'])->first();
-        // else{
-        //     $data = BudgetVersion::latest('id')->with(['period', 'division', 'type'])->get();//->paginate($length);
-        //     foreach($data as $a){
-        //         $a['state'] = $a['status'] ? 'AKTIF' : 'NON-AKTIF';
-        //     }
-        // }
+        if ($request->id){
+            $data = BudgetService::where('id',$request->id)->first();
+            $header = (object)['id'=>$data->t_budget_id];
+            $item = [];
+            $iselect = null;
+        }else{
+            if ($request->hid)
+                $header = Budget::find($request->hid);
+            else
+                return redirect(url('/pengajuan'));
+            $item = BudgetItem::where(['t_budget_id'=>$request->hid, 'item_category'=>3])->get();
+            if (sizeof($item) == 0)
+                return redirect(url('/pengajuan/item').'?hid='.$request->hid);
+            elseif ($request->iid){
+                $data = BudgetService::orderBy('seq_no')->where('t_budget_item_id',$request->iid)->with(['gl_accounts','cost_centers','internal_orders'])->get();
+                $iselect = $item->where('id',$request->iid)->first();
+            }else{
+                $request['iid'] = $item[0]->id;
+                $data = BudgetService::orderBy('seq_no')->where('t_budget_item_id',$item[0]->id)->with(['gl_accounts','cost_centers','internal_orders'])->get();
+                $iselect = $item[0];
+            }
+        }
         $select = [
             'umeasure' => SapUnitMeasure::where('status', 1)->get(),
             'pr_doc' => SapDocType::where('status', 1)->get(),
             'currency' => SapCurrency::where('status',1)->get(),
             'budget_version' => BudgetVersion::where('status', 1)->get(),
 
-            'items' => [],
-            'glaccount' => SapAccount::where('status', 1)->get(),
-            'costcenter' => [['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
-            'internal' => [['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
+            'items' => $item,
+            'glaccount' => SapGlAccount::where('status', 1)->get(),
+            'costcenter' => SapCostCenter::where('status',1)->get(),//[['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
+            'internal' => InternalOrderRpt::whereNull('t_budget_id')->orWhere('t_budget_id',$request->hid)->get()//[['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
+
         ];
-        return view('pages.pengajuan.service', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);
+        return view('pages.pengajuan.service', [ 'data' => $data , 'header'=>$header, 'select'=>$select, 'iselect'=>$iselect, 'error'=>$error]);
     }
 
     /**
@@ -59,9 +82,37 @@ class PengajuanServiceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(Request $request){
+        $request['iid'] = $request->t_budget_item_id;
+        if ($validate = $this->validing($request->all(), [
+            'iid'=>'required',
+            'seq_no'=>'required',
+            'short_text'=>'required',
+            // 'unit_qty'=>'required',
+            'qty_proposed'=>'required',
+            'price_proposed'=>'required',
+            'currency'=>'required',
+            'gl_account'=>'required',
+            'cost_center'=>'required',
+        ]))
+            return $this->index($request, $validate);
+        try{
+            $request['t_budget_item_id'] = $request->iid;
+            $request['item_status'] = "Draft";
+            $request['price_unit'] = 1;
+            // if ($request->item_category == 3){
+                // $request['short_text'] = $request->_short_text;
+            //     $request['material_group'] = $request->_material_group;
+            //     $request['uom'] = $request->_uom;
+            // }
+            // if ($request->account_assignment != 1){
+            //     $request['internal_order'] = null;
+            // }
+            BudgetService::create($request->toArray());
+        }catch(Exception $th){
+            return $this->index($request, $th->getMessage());
+        }
+        return redirect($request->url().'?hid='.$request->hid.'&iid='.$request->iid);
     }
 
     /**
@@ -93,9 +144,13 @@ class PengajuanServiceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, $id){
+        try{
+            BudgetService::find($id)->update($request->toArray());
+        } catch(Exception $th){
+            return $this->index($request, $th->getMessage());
+        }
+        return redirect(dirname($request->url()));
     }
 
     /**
@@ -104,8 +159,9 @@ class PengajuanServiceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
-        //
+        BudgetService::destroy($id);
+        return redirect($request->url);
     }
 }

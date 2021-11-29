@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Budget;
-use App\BudgetPeriod;
+use App\InternalOrder;
+use Exception;
 use Illuminate\Http\Request;
 
-class OverviewController extends Controller
+class MasterIoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,10 +14,16 @@ class OverviewController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $error = ''){
-        if ($length = $request->el)
+        if (!$length = $request->el)
             $length = 10;
-        $data = Budget::latest('created')->with(['doc_types','budget_versions'])->withCount('items')->get();
-        return view('pages.overview', [ 'data' => $data, 'error'=>$error]);
+        if ($request->id)
+            $data = InternalOrder::find($request->id);
+        else{
+            $paginate = InternalOrder::latest('id')->paginate($length);
+            // $data = $paginate->data;//paginate($length);
+            $data = $paginate->getCollection();
+        }
+        return view('pages.masterdata.io', ['data' => $data, 'length' => $length, 'error' => $error]);
     }
 
     /**
@@ -38,7 +44,18 @@ class OverviewController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if ($validate = $this->validing($request->all(), [
+            'io_code' => 'required',
+            'io_date' => 'required',
+        ]))
+            return $this->index($request, $validate);
+        try{
+            $request['status']=0;
+            InternalOrder::create($request->toArray());
+        }catch(Exception $th){
+            return $this->index($request, $th->getMessage());
+        }
+        return redirect($request->url());
     }
 
     /**

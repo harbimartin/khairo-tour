@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Budget;
+use App\BudgetStatus;
+use App\BudgetStatusRpt;
 use Illuminate\Http\Request;
 
 class PersetujuanController extends Controller
@@ -14,141 +17,20 @@ class PersetujuanController extends Controller
     public function index(Request $request, $error = ''){
         if ($length = $request->el)
             $length = 10;
-        $data = json_encode([
-            [
-                'id'=>1,
-                'nama'=>'Anggaran 1',
-                'budget'=>'1000000000',
-                'status'=>'Proposed'
-            ],
-            [
-                'id'=>2,
-                'nama'=>'Anggaran 2',
-                'budget'=>'2000000000',
-                'status'=>'Proposed'
-            ],
-            [
-                'id'=>3,
-                'nama'=>'Anggaran 3',
-                'budget'=>'3123123',
-                'status'=>'Proposed'
-            ],
-        ]);
-        $select = [];
-        // if ($request->id)
-        //     $data = BudgetVersion::where('id',$request->id)->with(['period', 'division', 'type'])->first();
-        // else{
-        //     $data = BudgetVersion::latest('id')->with(['period', 'division', 'type'])->get();//->paginate($length);
-        //     foreach($data as $a){
-        //         $a['state'] = $a['status'] ? 'AKTIF' : 'NON-AKTIF';
-        //     }
-        // }
         if ($request->id){
-            $data = $this->pr_data();
-            return view('pages.persetujuan.list', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);
-        }else
-            return view('pages.persetujuan', [ 'data' => $data , 'select'=>$select, 'error'=>$error]);
-    }
-    public function pr_data(){
-        $data = (object)[
-            'no_mra'=>1150004008,
-            'text_header'=>'RENCANA ANGGARAN BIAYA INTEGRASI eBUDDGETING # SAP PT KRAKATAU BANDAR SAMUDERA (UNPLANNED)',
-            'items' => [
-                [
-                    'id'=>1,
-                    'no_item'=>10,
-                    'desc'=>'Integrasi Web e Budgetting SAP',
-                    'spec'=>'RENCANA ANGGARAN BIAYA INTEGRASI eBUDDGETING # SAP PT KRAKATAU BANDAR SAMUDERA (UNPLANNED)',
-                    'deliv'=>'2022-02-28',
-                    'pgr'=>['id'=>1, 'code'=>'P10'],
-                    'qty'=>1,
-                    'uom'=>['id'=>1, 'code'=>'AU'],
-                    'cur'=>['id'=>1, 'code'=>'IDR'],
-                    'eprice'=>498950000,
-                    'uprice'=>1,
-                    'assign'=>[
-                        'id'=>1,
-                        'gla'=>['id'=>1, 'no'=>5101112, 'title'=>'Maintenance Expenses', 'point'=>'Others'],
-                        'cc'=>['id'=>1, 'no'=>232100, 'division'=>'Div TI & SM'],
-                        'io'=>null
-                    ],
-                    'service'=>[
-                        [
-                            'id'=>1,
-                            'no'=>10,
-                            'desc'=>'Jasa Develop di SAP System',
-                            'qty'=>1,
-                            'uom'=>['id'=>2, 'code'=>'PAC'],
-                            'cur'=>['id'=>1, 'code'=>'IDR'],
-                            'eprice'=>340600000,
-                        ],
-                        [
-                            'id'=>2,
-                            'no'=>20,
-                            'desc'=>'Jasa Develop di iFace System',
-                            'qty'=>1,
-                            'uom'=>['id'=>2, 'code'=>'PAC'],
-                            'cur'=>['id'=>1, 'code'=>'IDR'],
-                            'eprice'=>158350000,
-                        ],
-                    ]
-                ],
-                [
-                    'id'=>2 ,
-                    'no_item'=>20,
-                    'desc'=>'Integrasi KIP Single Window',
-                    'spec'=>'RENCANA ANGGARAN BIAYA INTEGRASI KIP Single Window # SAP PT KRAKATAU BANDAR SAMUDERA (UNPLANNED)',
-                    'deliv'=>'2022-03-28',
-                    'pgr'=>['id'=>2, 'code'=>'P20'],
-                    'qty'=>1,
-                    'uom'=>['id'=>1, 'code'=>'AU'],
-                    'cur'=>['id'=>1, 'code'=>'IDR'],
-                    'eprice'=>250000000,
-                    'uprice'=>1,
-                    'assign'=>[
-                        'id'=>1,
-                        'gla'=>['id'=>1, 'no'=>5101112, 'title'=>'Maintenance Expenses', 'point'=>'Others'],
-                        'cc'=>['id'=>1, 'no'=>232100, 'division'=>'Div TI & SM'],
-                        'io'=>null
-                    ],
-                    'service'=>[
-                        [
-                            'id'=>1,
-                            'no'=>10,
-                            'desc'=>'Jasa Develop di Digital Cabinet',
-                            'qty'=>1,
-                            'uom'=>['id'=>2, 'code'=>'PAC'],
-                            'cur'=>['id'=>1, 'code'=>'IDR'],
-                            'eprice'=>120600000,
-                        ],
-                        [
-                            'id'=>2,
-                            'no'=>20,
-                            'desc'=>'Jasa Develop di iFace System',
-                            'qty'=>1,
-                            'uom'=>['id'=>2, 'code'=>'PAC'],
-                            'cur'=>['id'=>1, 'code'=>'IDR'],
-                            'eprice'=>128350000,
-                        ],
-                    ]
-                ]
-            ]
-        ];
-        $total = 0;
-        foreach($data->items as $key => $item){
-            $data->items[$key]['amount'] = $count = $item['eprice'] * $item['uprice'];
-            $total += $count;
-            foreach($item['service'] as $keys => $iteme){
-                $data->items[$key]['service'][$keys]['amount'] = $iteme['eprice'] * $item['uprice'];
-            }
+            $controller = new PengajuanController();
+            $data = $controller->budget_detail($request, false);
+            $budget_rpt = BudgetStatusRpt::where(['id'=>$request->id,'user_id' => $_SESSION['ebudget_id'], 'status_active'=>1])->first();
+            if ($budget_rpt)
+                return view('pages.persetujuan.list', [ 'data' => $data, 'error'=>$error, 'status_id'=>$budget_rpt->t_budget_status_id, 'purpose'=>'Propose']);
+            else
+                return redirect($request->url());
+        }else{
+            $data = BudgetStatusRpt::where('user_id',$_SESSION['ebudget_id'])->where('status_active', 1)->get();
+            // return $data;
+            // $data = Budget::latest('created')->where('budget_status', 'Proposed')->with(['doc_types','budget_versions'])->withCount('items')->get();
+            return view('pages.persetujuan', [ 'data' => $data, 'error'=>$error]);
         }
-        $data->total = $total;
-        return $data;
-    }
-    public function purchase_requisitions(){
-        return $this->resSuccess(
-            'Purchase Requisitions',$this->pr_data()
-        );
     }
     /**
      * Show the form for creating a new resource.
@@ -168,7 +50,6 @@ class PersetujuanController extends Controller
      */
     public function store(Request $request)
     {
-        //
     }
 
     /**
@@ -200,9 +81,51 @@ class PersetujuanController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, $id){
+        switch($request->type){
+            case 'reject':
+                $budget = Budget::find($id);
+                $budget->update([
+                    'budget_status'=>'Rejected',
+                    'note_reject'=>$request->reason
+                ]);
+            break;
+            case 'verifikasi':
+                $budget = Budget::find($id);
+                $budget->update([
+                    'budget_status'=>'Verified',
+                ]);
+
+                // $admin_id = $budget->proposed_by;
+                // $res = $this->notifKFA(
+                //     $admin_id
+                // , $budget);
+                // if (!isset($res->data))
+                //     return json_encode($res);
+                // $body = array(
+                //     $admin_id,
+                //     $budget->proposed_by,
+                //     $_SESSION['ebudget_id']
+                // );
+                // $user_detail = $this->getUser($body);
+                // $data = [
+                //     "name"=>$user_detail[$admin_id]['nama'],
+                //     "intro" => "Permohonan verifikasi Memo Realisasi Anggaran dengan rincian sebagai berikut :",
+                //     "table" => [
+                //         "Kode" => $budget->budget_code,
+                //         "Tanggal" => $budget->budget_date,
+                //         "Tipe Dokumen" => $budget->doc_types->doc_type_desc,
+                //         "Catatan Header" => $budget->note_header,
+                //         "Versi" => $budget->budget_versions->budget_name,
+                //         "Status" => $budget->budget_status,
+                //     ],
+                //     "close" => "Dimohon untuk segera membuka web E-Budgeting untuk melakukan verifikasi.",
+                //     "link" => url('/persetujuan'),
+                //     "pemohon" => $user_detail[$budget->proposed_by]['nama']
+                // ];
+                // $this->send_email($user_detail[$admin_id]['email'], $user_detail[$admin_id]['nama'], "Verifikasi : Memo Realisasi Anggaran No.".$budget->budget_code, $data);
+            break;
+        }
     }
 
     /**

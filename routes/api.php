@@ -18,4 +18,8 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::get('purchase_requisitions','PersetujuanController@purchase_requisitions');
+Route::post('budget_rpt','PengajuanController@budget_rpt');
+Route::get('budget_history','PengajuanController@budget_status_rpt');
+Route::get('budget_notif','PengajuanController@budget_notif_rpt');
+Route::get('budget_notif/count','PengajuanController@budget_notif_count');
+Route::get('budget_detail','PengajuanController@budget_detail');

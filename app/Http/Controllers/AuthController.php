@@ -6,18 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller{
-    public function view_index(Request $request){
-        // if(!Auth::check())
-        //     return redirect('/login');
-        // $data = $request->cookie('_BSRF');
-        // $data = json_encode($request->session()->all());
-        session_start();
-        return $_SESSION['ebudget_id'];
-        // return view('pages.home', [ 'data' => $data, 'test'=>'heyoo']);
+    public function view_index(){
+        if(isset($_SESSION['ebudget_id']) && !empty($_SESSION['ebudget_id']))
+            return view('pages.home', ['data' => $_SESSION['ebudget_id']]);
+        header("Location: http://localhost:70/sikar/login.php");
+        die();
     }
     public function view_login(Request $request){
-        session_start();
-        $_SESSION['ebudget_id'] = 'ehhehe';
         return view('login');
     }
     public function method_login(Request $request){

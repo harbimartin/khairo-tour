@@ -13,12 +13,14 @@ class Update extends Component
     public $error;
     public $select;
     public $idk;
+    public $detail;
+    public $burl;
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($column, $url, $title, $data, $select = '',$idk = 'id',  $error = ''){
+    public function __construct($column, $title, $data, $url = null,$select = '',$idk = 'id',  $error = '', $detail = false, $burl = null){
         $this->idk = $idk;
         $this->column = $column;
         $this->title = $title;
@@ -26,6 +28,8 @@ class Update extends Component
         $this->datas = $data;
         $this->error = $error;
         $this->select = $select;
+        $this->detail = $detail;
+        $this->burl = $burl;
     }
 
     /**

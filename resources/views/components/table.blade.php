@@ -96,8 +96,8 @@
                     <thead class="bg-gray-50">
                       <tr>
                         @foreach (json_decode($column) as $key => $param)
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider {{$param->type=='State' ? 'text-center':''}}">
-                                {{$param->name}}
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider {{isset($param->align) ? 'text-'.$param->align : ($param->type=='State' || $param->type='Boolean' ? 'text-center':'') }}">
+                                {!! $param->name !!}
                             </th>
                         @endforeach
                         <th scope="col" class="relative px-6 py-3">
@@ -109,7 +109,8 @@
                         @foreach (json_decode($datas, true); as $item)
                         <tr>
                             @foreach (json_decode($column) as $key => $param)
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4 whitespace-nowrap {{isset($param->align) ? 'text-'.$param->align : ($param->type=='State' || $param->type=='Boolean' ? 'text-center':'') }}
+                                    @isset($param->if){{($item[$param->if[0]] == $param->if[1]) == $param->if[2] ? '':'hidden'}}@endisset">
                                         @switch($param->type)
                                             @case('Money')
                                                     <div class="text-sm text-gray-900">{{ "Rp " . number_format($item[$key],2,',','.')}}</div>
@@ -119,6 +120,16 @@
                                                 @break
                                             @case('String')
                                                     <div class="text-sm text-gray-900">{{$item[$key]}}</div>
+                                                @break
+                                            @case('Date')
+                                                    <div class="text-sm text-gray-900">{{date('j F, Y', strtotime($item[$key]))}}</div>
+                                                @break
+                                            @case('Boolean')
+                                                <div class="flex">
+                                                    <div class="px-2 inline-flex mx-auto text-xs leading-5 font-semibold rounded-full {{$item[$key] ? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'}}">
+                                                        {{$param->val[$item[$key]]}}
+                                                    </div>
+                                                </div>
                                                 @break
                                             @case('State')
                                                 <div class="flex">
@@ -134,7 +145,19 @@
                                                 </div>
                                                 @break
                                             @case('Edit')
-                                                    <a href="{{Request::url().'?id='.$item['id']}}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                @isset($param->header)
+                                                    <a href="{{$param->header[0].'?'.$param->header[1].'='.$item[$idk].(sizeof($param->header)==3? $param->header[2] : '')}}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                @else
+                                                    <a href="{{Request::url().'?id='.$item[$idk]}}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                @endisset
+                                                @break
+                                            @case('Delete')
+                                                <form action="{{Request::url().'/'.$item['id']}}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <input id="url" name="url" value="{{Request::fullUrl()}}" hidden>
+                                                    <button type="submit" class="text-indigo-600 hover:text-indigo-900">Delete</button>
+                                                </form>
                                                 @break
                                             @case('Direct')
                                                     <a href="{{$param->url.'/view'}}" class="text-indigo-600 hover:text-indigo-900">View</a>
