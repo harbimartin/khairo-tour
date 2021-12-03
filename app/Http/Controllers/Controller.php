@@ -98,7 +98,7 @@ class Controller extends BaseController
         $client = curl_init();
         $authorization = "Authorization: Bearer ".$_SESSION['ebudget_token'];
         curl_setopt_array($client, array(
-            CURLOPT_URL => 'http://103.126.30.250:8086/sikar_api/api/'.$param,
+            CURLOPT_URL => 'http://192.168.0.27:88/sikar_api/api/'.$param,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -121,7 +121,7 @@ class Controller extends BaseController
         $client = curl_init();
         // $authorization = "Authorization: Bearer ".$_SESSION['ebudget_token'];
         curl_setopt_array($client, array(
-            CURLOPT_URL => 'http://172.16.11.178:8000/api/kfa/notif/',
+            CURLOPT_URL => 'http://172.16.11.178:8000/api/kfa/notif/',//env('KFA_URL'),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -170,10 +170,33 @@ class Controller extends BaseController
                     'title' => $subject,
                     'body' => json_encode($data),
                     'view' => $view,
-                    'error' => $th->getMessage(),
+                    'error' => substr($th->getMessage(), 0, 254),
                     'status' => '0'
                 ]);
             // }catch(Exception $th){}
         }
+    }
+
+
+    public function callSAP($xmls,$urls){
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => 'http://192.168.0.20:1101/axis2/services/'.$urls,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => 'UTF-8',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS =>$xmls,
+        CURLOPT_HTTPHEADER => array(
+                'Content-Type: text/xml',
+                'SOAPAction : processRequest'
+            ),
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
     }
 }

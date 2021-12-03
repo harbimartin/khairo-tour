@@ -10,6 +10,7 @@ use App\GenSerial;
 use App\SapDocType;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 
 class PengajuanController extends Controller
 {
@@ -70,18 +71,16 @@ class PengajuanController extends Controller
             return $this->index($request, $validate);
         try{
             $serial = GenSerial::where('SERIAL_ID','MRA')->first();
-            $request['budget_code'] = $serial->PREFIX.date("Y").str_pad($serial->NEXT_VALUE, $serial->LENGTH, '0', STR_PAD_LEFT);
+            $request['budget_code'] = $serial->PREFIX.date("y").str_pad($serial->NEXT_VALUE, $serial->LENGTH, '0', STR_PAD_LEFT);
             // if ($request->budget_attachment){
-                // foreach($request->file as $key => $file){
-                    // if ($request->hasFile('budget_attachment')) {
-                    //     $file = $request->file('budget_attachment');
-                    //     $filename = $request['budget_code'].$file->getClientOriginalExtension();
-                    //     $this->unlink_file('pengajuan', $filename);
-                    //     $file->move(public_path('pengajuan'), $filename);
-                    //     $request['budget_attachment'] = $filename;
-                    // }else
-                    //     return $this->resFailed(404, $request->budget_attachment." file not emitted!");
-                // }
+            //     if ($request->hasFile('budget_attachment')) {
+            //         $file = $request->file('budget_attachment');
+            //         $filename = $request['budget_code'].$file->getClientOriginalExtension();
+            //         $this->unlink_file('file_budget', $filename);
+            //         $file->move(public_path('file_budget'), $filename);
+            //         $request['budget_attachment'] = $filename;
+            //     }else
+            //         return $this->resFailed(404, $request->budget_attachment." file not emitted!");
             // }
             $request['budget_status'] = "Draft";
             $request['created_by'] = $_SESSION['ebudget_id'];
@@ -122,8 +121,7 @@ class PengajuanController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
         switch($request->__type){
             case 'update':
                 try{
@@ -137,10 +135,8 @@ class PengajuanController extends Controller
                 }
                 return redirect($request->_last_);
             case 'propose':
-                // $budget = Budget::find($id);
-                // $budget->update(['budget_status'=>'Proposed']);
-
                 return redirect(url('/').'/pengajuan/propose?id='.$id);
+                break;
         }
     }
 
@@ -155,9 +151,17 @@ class PengajuanController extends Controller
         //
     }
 
+    public function download(Request $request){
+        $file= public_path(). "/file_budget/".$request->name;
+        $headers = array(
+                  'Content-Type: application/pdf',
+                );
+        return Response::download($file, 'ebudget.pdf', $headers);
+    }
     public function budget_rpt(Request $request){
         // return ['divisions_id'=> $request->division_id, 'created_by'=>$request->user_id];
-        $data = BudgetRpt::where(['divisions_id'=> $request->division_id, 'created_by'=>$request->user_id])->get();
+        // return $request->toArray();
+        $data = BudgetRpt::where(['divisions_id'=> $request->division_id, 'created_by'=>$request->user_id])->search($request)->get();
         return $data;
     }
     public function budget_status_rpt(Request $request){
@@ -167,11 +171,11 @@ class PengajuanController extends Controller
     }
     public function budget_notif_rpt(Request $request){
         // return ['divisions_id'=> $request->division_id, 'created_by'=>$request->user_id];
-        $data = BudgetStatusRpt::where('user_id',$request->user_id)->whereNull('user_status')->get();
+        $data = BudgetStatusRpt::where(['user_id'=>$request->user_id, 'status_active'=>1])->whereNull('user_status')->get();
         return $data;
     }
     public function budget_notif_count(Request $request){
-        $data = BudgetStatusRpt::where('user_id',$request->user_id)->whereNull('user_status')->count();
+        $data = BudgetStatusRpt::where(['user_id'=>$request->user_id, 'status_active'=>1])->whereNull('user_status')->count();
         return $data;
     }
     public function budget_detail(Request $request, $api = true){
@@ -181,15 +185,20 @@ class PengajuanController extends Controller
                 $q->with(['uom','gl_accounts','internal_orders','cost_centers']);
             }]);
         }])->first();
-        $total = 0;
+        $total_proposed = 0;
+        $total_verified = 0;
         foreach($data->items as $key => $item){
-            $data->items[$key]['amount'] = $count = $item['price_proposed'] * $item['qty_proposed'];
-            $total += $count;
+            $data->items[$key]['amount_proposed'] = $count_proposed = $item['price_proposed'] * $item['qty_proposed'];
+            $data->items[$key]['amount_verified'] = $count_verified = $item['price_verified'] * $item['qty_proposed'];
+            $total_proposed += $count_proposed;
+            $total_verified += $count_verified;
             foreach($item['service'] as $keys => $iteme){
-                $data->items[$key]['service'][$keys]['amount'] = $iteme['price_proposed'] * $item['qty_proposed'];
+                $data->items[$key]['service'][$keys]['amount_proposed'] = $iteme['price_proposed'] * $item['qty_proposed'];
+                $data->items[$key]['service'][$keys]['amount_verified'] = $iteme['price_verified'] * $item['qty_proposed'];
             }
         }
-        $data->total = $total;
+        $data->total_proposed = $total_proposed;
+        $data->total_verified = $total_verified;
         if ($api)
             return $this->resSuccess('Memo Realisasi Anggaran',$data);
         else

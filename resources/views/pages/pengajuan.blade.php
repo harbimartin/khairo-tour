@@ -36,6 +36,12 @@
                     :error="$error"
                     burl="overview"
                 >
+                    <input
+                        v-on:click="downloadFile('{{$header['budget_attachment']}}')"
+                        class="flex rounded border px-4 py-2 bg-blue-500 hover:bg-blue-600 mr-5 cursor-pointer text-white font-semibold"
+                        type="button"
+                        value="Download Lampiran"
+                    />
                     <button type="submit" name="__type" value="propose"
                         class="rounded border px-4 py-2 bg-indigo-500 hover:bg-indigo-600 mr-5 cursor-pointer text-white font-semibold"
                     >

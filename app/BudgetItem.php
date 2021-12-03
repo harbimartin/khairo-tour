@@ -30,7 +30,8 @@ class BudgetItem extends Model{
         'gl_account',
         'cost_center',
         'internal_order',
-        'item_status'
+        'item_status',
+        'price_verified'
     ];
     // public static function boot(){
     //     parent::boot();
@@ -67,5 +68,16 @@ class BudgetItem extends Model{
     }
     public function service(){
         return $this->hasMany(BudgetService::class, 't_budget_item_id', 'id');
+    }
+
+    public function getTotalProposed() {
+        return $this->service->sum(function($item) {
+          return $item->qty_proposed * $item->price_proposed;
+        });
+    }
+    public function getTotalVerified() {
+        return $this->service->sum(function($item) {
+          return $item->qty_proposed * $item->price_verified;
+        });
     }
 }

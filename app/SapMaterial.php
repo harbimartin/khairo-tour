@@ -32,4 +32,7 @@ class SapMaterial extends Model
     public function uoms(){
         return $this->hasOne(SapUnitMeasure::class, 'id', 'uom')->select('id','unit_measurement', 'unit_measurement_desc');
     }
+    public function mgroups(){
+        return $this->hasOne(SapMaterialGroup::class, 'id', 'material_group')->select('id','material_group');
+    }
 }

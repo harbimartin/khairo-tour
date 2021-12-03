@@ -8,6 +8,7 @@ class Table extends Component
 {
     public $column;
     public $datas;
+    public $sort;
     public $datef;
     public $import;
     public $idk;
@@ -16,9 +17,10 @@ class Table extends Component
      *
      * @return void
      */
-    public function __construct($column, $datas, $datef = false, $import = false, $idk = 'id'){
+    public function __construct($column, $datas, $sort=true, $datef = false, $import = false, $idk = 'id'){
         $this->column = $column;
         $this->datas = $datas;
+        $this->sort = $sort;
         $this->datef = $datef;
         $this->import = $import;
         $this->idk = $idk;

@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Budget;
 use App\BudgetStatus;
-use App\BudgetVersionRpt;
-use App\SapDocType;
 use Illuminate\Http\Request;
 
-class PengajuanProposeController extends Controller
+class VerifikasiProposeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,15 +17,15 @@ class PengajuanProposeController extends Controller
         if ($length = $request->el)
             $length = 10;
         $data = [];
-        if ($request->id){
-            $header = Budget::find($request->id);
+        if ($request->hid){
+            $header = Budget::find($request->hid);
             // if ($header->budget_versions->division_id != $_SESSION['ebudget_division_id'])
             //     return "Maaf kamu tidak bisa mengakses Laman ini";
         }else
-            return redirect(url('/pengajuan'));
-        $level = $header->getLevelPropose();
+            return redirect(url('/verifikasi'));
         $all = $this->karyawanAll();
-        $user = [
+        $level = $header->getLevelVerify();
+        $select = [
             'user_5'=>[],
             'user_6'=>[],
             'user_7'=>[],
@@ -35,20 +33,11 @@ class PengajuanProposeController extends Controller
         ];
         foreach($all as $val){
             for($i = $val['position_level']; $i>=5; $i--){
-                array_push($user['user_'. $i], $val);
+                array_push($select['user_'. $i], $val);
             }
         }
-        $select = [
-            'pr_doc' => $request->mra ? SapDocType::find($request->mra) : SapDocType::where('status',1)->get(),
-            'budget_version' => BudgetVersionRpt::where([
-                'status_version'=>1,
-                'status_period'=>1,
-                'divisions_id'=>$_SESSION['ebudget_division_id']
-            ])->get(),
-        ];
-        $select = array_merge($select, $user);
         // return $select;
-        return view('pages.pengajuan.propose', [ 'data' => $data , 'level'=>$level, 'total'=>$header->getTotalPropose(),  'header'=>$header, 'select'=>$select, 'error'=>$error]);
+        return view('pages.verifikasi.vpropose', [ 'data' => $data , 'level'=>$level, 'total'=>$header->getTotalVerify(),'header'=>$header, 'select'=>$select, 'error'=>$error]);
     }
 
     /**
@@ -56,8 +45,7 @@ class PengajuanProposeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
+    public function create(){
         //
     }
 
@@ -69,11 +57,11 @@ class PengajuanProposeController extends Controller
      */
     public function store(Request $request){
         // return $request->toArray();
-        $budget = Budget::find($request->id);
-        $level = $budget->getLevelPropose();
+        $budget = Budget::find($request->hid);
+        $level = $budget->getLevelVerify();
         if ($budget){
-            if ($budget->budget_status == 'Draft'){
-                for($i = $level; $i <= 4; $i++){
+            if ($budget->budget_status == 'Verification'){
+                for($i = $level; $i <= 8; $i++){
                     if ($i == $level){
                         $this->notifKFA(
                             96,//$request['uid'.$i]
@@ -88,7 +76,7 @@ class PengajuanProposeController extends Controller
                         $user_detail = $this->getUser($body);
                         $data = [
                             "name"=>$user_detail[$request['uid'.$i]]['nama'],
-                            "intro" => "Permohonan persetujuan Memo Realisasi Anggaran dengan rincian sebagai berikut :",
+                            "intro" => "Permohonan persutujuan verifikasi Memo Realisasi Anggaran dengan rincian sebagai berikut :",
                             "table" => [
                                 "Kode" => $budget->budget_code,
                                 "Tanggal" => $budget->budget_date,
@@ -101,7 +89,7 @@ class PengajuanProposeController extends Controller
                             "link" => url('/persetujuan'),
                             "pemohon" => $user_detail[$_SESSION['ebudget_id']]['nama']
                         ];
-                        $this->send_email($request['ue'.$i], $user_detail[$request['uid'.$i]]['nama'], "Persetujuan : Memo Realisasi Anggaran No.".$budget->budget_code, $data);
+                        $this->send_email($request['ue'.$i], $user_detail[$request['uid'.$i]]['nama'], "Usulan Verifikasi : Memo Realisasi Anggaran No.".$budget->budget_code, $data);
                     }
                     BudgetStatus::create([
                         't_budget_id' => $budget->id,
@@ -115,12 +103,12 @@ class PengajuanProposeController extends Controller
                     ]);
                 }
                 $budget->update([
-                    'budget_status'=>'Proposed',
-                    'proposed' => now(),
-                    'proposed_by' => $_SESSION['ebudget_id']
+                    'budget_status'=>'Verification - Proposed',
+                    'verified' => now(),
+                    'verified_by' => $_SESSION['ebudget_id']
                 ]);
             }
-            return redirect(url('/').'/overview');
+            return redirect(url('/').'/verifikasi');
             // }
             // return 'nacawc';
         }

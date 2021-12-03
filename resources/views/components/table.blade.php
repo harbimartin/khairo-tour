@@ -1,11 +1,14 @@
 <div class="px-6">
     <div class="container rounded-lg shadow my-8 py-4 px-6 bg-white">
         <div class="flex">
-            <span>
-                Show
-                <input type="number" value="10" maxlength="2" size="2" class="w-16 rounded-lg border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
-                &nbsp;Entries
-            </span>
+            {{ $slot }}
+            @if($sort)
+                <span>
+                    Show
+                    <input type="number" value="10" maxlength="2" size="2" class="w-16 rounded-lg border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                    &nbsp;Entries
+                </span>
+            @endif
             @if($datef)
                 <span class="ml-auto">
                     From <input type="date" class="rounded-lg border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
@@ -54,7 +57,6 @@
                                                         <div class="form-group">
                                                             <input type="file" name="file" required="required">
                                                         </div>
-
                                                     </div>
                                                 </div>
                                         </div>
@@ -124,6 +126,10 @@
                                             @case('Date')
                                                     <div class="text-sm text-gray-900">{{date('j F, Y', strtotime($item[$key]))}}</div>
                                                 @break
+                                            @case('DateTime')
+                                                    <div class="text-sm text-gray-900">{{date('j F, Y H:i:s', strtotime($item[$key]))}}</div>
+                                                @break
+
                                             @case('Boolean')
                                                 <div class="flex">
                                                     <div class="px-2 inline-flex mx-auto text-xs leading-5 font-semibold rounded-full {{$item[$key] ? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'}}">

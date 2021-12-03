@@ -1,5 +1,5 @@
 <div class="px-6">
-    <form class="container rounded-lg shadow my-8 py-4 px-6 bg-white" action="{{request()->url()}}" method="POST">
+    <form class="container rounded-lg shadow my-8 py-4 px-6 bg-white" action="{{request()->fullUrl()}}" method="POST">
         <h1 class="border-b text-2xl pb-2 border-gray-200">
             @if($title!="Verifikasi")
                 {{$title}}
@@ -15,6 +15,22 @@
                         <label for="{{$key}}" class="mt-1">{{$param->name}}</label>
                     @endisset
                     @switch($param->type)
+                        @case('Info')
+                            <div class="col-start-2 col-end-7 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                                <span>:</span>
+                                <span class="ml-2">
+                                    @isset($param->format)
+                                        @switch($param->format)
+                                            @case('Money')
+                                                {{"Rp " . number_format($param->val,2,',','.')}}
+                                            @break
+                                        @endswitch
+                                    @else
+                                        {{$param->val}}
+                                    @endisset
+                                </span>
+                            </div>
+                        @break
                         @case('Reference')
                             <input readonly
                                 id="{{$key}}"
@@ -96,10 +112,11 @@
                                                 }
                                             }else{
                                                 foreach($param->val as $kk => $val){
+                                                    $str = $item[$val];
                                                     if ($kk == 0)
-                                                        $txt = $txt.$item[$val];
+                                                        $txt = $txt.($str == '' ? '(Blank)':$str);
                                                     else
-                                                        $txt = $txt.' - '.$item[$val];
+                                                        $txt = $txt.' - '.$str;
                                                 }
                                             }
                                             if (isset($param->def) && $item->id == $param->def)
@@ -133,6 +150,9 @@
                                 @isset($param->def)value="{{$param->def}}"@endisset
                                 @isset($param->share)v-on:change="inputSetIf('{{$key}}',$event)"@endisset
                                 class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                                @isset($param->null)
+                                    <option selected value="" class="text-gray-400">(Blank)</option>
+                                @endisset
                                 @foreach ($select[$param->api] as $item)
                                     <option
                                         @isset($param->def)@if($param->def == $item['id'])selected @endif @endisset
@@ -143,7 +163,7 @@
                                         >
                                             @foreach($param->val as $key => $val)
                                                 @if($key == 0)
-                                                    {{$item[$val]}}
+                                                    {{$item[$val] ? $item[$val] : '(Blank)'}}
                                                 @else
                                                     - {{$item[$val]}}
                                                 @endif
@@ -193,6 +213,9 @@
             @switch($title)
                 @case('Propose')
                     Propose
+                    @break
+                @case('Verification - Proposed')
+                    Verification - Proposed
                     @break
                 @default
                 Add {{$title}}

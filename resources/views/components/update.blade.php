@@ -7,6 +7,8 @@
 
         $columns = json_decode($column);
         foreach($columns as $k => $v){
+            if (!isset($v->by))
+                $v->by = $k;
             if (isset($v->if)){
                 $final = true;
                 for($i = 0; $i < sizeof($v->if); $i+=3){
@@ -34,11 +36,13 @@
         </svg>
       <span class="my-2 font-semibold"> Kembali</span>
     </a>
-    <form class="container rounded-lg shadow my-8 py-4 px-6 bg-white" action="{{(isset($url) ? url('/').$url : request()->url()).'/'.$id}}" method="POST">
+    <form class="container rounded-lg shadow my-8 py-4 px-6 bg-white" action="{{(isset($url) ? url('/').$url : request()->url()).'/'.$id.'?'.Request::getRequestUri()}}" method="POST">
         @csrf
         @method('PUT')
         @isset($url)
-            <input hidden id="_last_" name="_last_" value="{{request()->fullUrl()}}">
+            <input hidden name="_last_" value="{{request()->fullUrl()}}">
+        @else
+            <input hidden name="_next" value="{{$back_query}}">
         @endisset
         @switch($title)
             @case('MRA')
@@ -57,18 +61,18 @@
                     @endisset
                     @switch($param->type)
                         @case('Reference')
-                            <input readonly
+                            <input
+                                readonly
                                 id="{{$key}}"
                                 name="{{$key}}"
                                 value-from="{{$param->key}}"
                                 based="{{$param->val}}"
                                 @isset($param->def)
-                                    value={{$param->def}}
+                                    value="{{$param->def}}"
                                 @endisset
                                 type="text"
                                 class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"
                             />
-                            {{-- <div v-html="document.getElementById('2').value"></div> --}}
                         @break
                         @case('Static')
                             <input
@@ -80,7 +84,32 @@
                             />
                         @break
                         @case('String')
-                            <input id="{{$key}}" name="{{$key}}" value="{{$datas[$key]}}" type="text" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                            <input
+                                @if($detail)readonly @endif
+                                id="{{$key}}"
+                                name="{{$key}}"
+                                value="{{$datas[$param->by]}}"
+                                type="text"
+                                class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                        @break
+                        @case('SString')
+                            <?php
+                                $txt = '';
+                                foreach($param->child as $on=>$child){
+                                    $str = $datas[$param->by][$child];
+                                    if ($on == 0)
+                                        $txt = ($str=='' ? '(Blank)':$str);
+                                    else
+                                        $txt = $txt.' - '.$str;
+                                }
+                            ?>
+                            <input
+                                readonly
+                                id="{{$key}}"
+                                name="{{$key}}"
+                                value="{{$txt}}"
+                                type="text"
+                                class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                         @break
                         @case('Number')
                             <input
@@ -89,7 +118,8 @@
                                 @endisset
                                 id="{{$key}}"
                                 name="{{$key}}"
-                                value="{{$datas[$key]}}"
+                                value="{{$datas[$param->by]}}"
+                                @if($detail && !isset($param->force))readonly @endif
                                 type="number"
                                 class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"
                             />
@@ -103,7 +133,7 @@
                             @isset($param->share)v-on:change="inputSetIf('{{$key}}',$event)"@endisset
                             >
                                 @foreach ($param->val as $ikey=>$item)
-                                    <option value={{$ikey}} {{$datas[$key] == $ikey ? 'selected': ''}}>
+                                    <option value={{$ikey}} {{$datas[$param->by] == $ikey ? 'selected': ''}}>
                                         {{$item}}
                                     </option>
                                 @endforeach
@@ -118,12 +148,14 @@
                                 class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"
                                 @isset($param->share)v-on:change="inputSetIf('{{$key}}',$event)"@endisset
                                 >
-                                <option disabled selected value="0" class="text-gray-400">(Kosong)</option>
+                                @isset($param->null)
+                                    <option selected value="" class="text-gray-400">(Blank)</option>
+                                @endisset
                                 @foreach ($select[$param->api] as $item)
-                                    <option value={{$item['id']}} {{$datas[$key]==$item['id'] ? 'selected': ''}}>
+                                    <option value={{$item['id']}} {{$datas[$param->by]==$item['id'] ? 'selected': ''}}>
                                         @foreach($param->val as $on => $val)
                                             @if($on == 0)
-                                                {{$item[$val]}}
+                                                {{$item[$val] ? $item[$val] : '(Blank)'}}
                                             @else
                                                 - {{$item[$val]}}
                                             @endif
@@ -138,35 +170,20 @@
                                     $base_value='';
                                 ?>
                                 @foreach ($select[$param->api] as $item)
-                                    <option
-                                        @isset($param->share)
-                                            <?php
-                                                $txt = '{';
-                                                $i = 0;
-                                                foreach($param->share as $column => $share){
-                                                    if ($share){
-                                                        $txt = $txt.($i>0?'","':'"').$column.'":"';
-                                                        foreach($share as $k => $v){
-                                                            $txt = $txt.($k==0?'':' - ').$item[$column][$v];
-                                                        }
-                                                    }else
-                                                        $txt = $txt.($i>0?'","':'"').$column.'":"'.$item[$column];
-                                                    $i++;
-                                                }
-                                                $txt = $txt.'"}';
-                                            ?>
-                                            data-item="{{$txt}}"
-                                        @endisset
-                                        data-value="{{$item->id}}"
-                                        <?php
-                                            $txt='';
+                                    <?php
+                                        $set = !$detail;
+                                        $txt='';
+                                        $same = $item->id == $datas[$param->by];
+                                        if ($set || $same){
                                             foreach($param->val as $kk => $val){
+                                                $str = $item[$val];
                                                 if ($kk == 0)
-                                                    $txt = $txt.$item[$val];
+                                                        $txt = $txt.($str == '' ? '(Blank)':$str);
                                                 else
-                                                    $txt = $txt.' - '.$item[$val];
+                                                    $txt = $txt.' - '.$str;
                                             }
-                                            if ($item->id == $datas[$key]){
+                                            if ($same){
+                                                $set = true;
                                                 $base_value = $txt;
                                                 if (isset($param->share)){
                                                     $vshare = (array) $param->share;
@@ -174,38 +191,75 @@
                                                         if ($vv->type == 'Reference' && $vv->key == $key){
                                                             $vkey = $vshare[$vv->val];
                                                             if ($vkey == 0){
-                                                                $vv->def = $select[$param->api][$item->id][$vv->val];
+                                                                $vv->def = $item[$vv->val];
                                                             }else{
                                                                 $vv->def = '';
                                                                 // echo json_encode($vkey);
                                                                 foreach($vkey as $vkk => $vki){
                                                                     // return;
-                                                                    $vv->def = $vv->def.($vkk == 0? '':' - ').$select[$param->api][$item->id][$vv->val][$vki];
+                                                                    $vv->def = $vv->def.($vkk == 0? '':' - ').$item[$vv->val][$vki];
                                                                 }
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
-                                        ?>
-                                        value="{{$txt}}">
-                                    </option>
+                                        }
+                                    ?>
+                                    @if($set)
+                                        <option
+                                            @isset($param->share)
+                                                <?php
+                                                    $otxt = '{';
+                                                    $i = 0;
+                                                    foreach($param->share as $column => $share){
+                                                        if ($share){
+                                                            $otxt = $otxt.($i>0?'","':'"').$column.'":"';
+                                                            foreach($share as $k => $v){
+                                                                $otxt = $otxt.($k==0?'':' - ').$item[$column][$v];
+                                                            }
+                                                        }else
+                                                            $otxt = $otxt.($i>0?'","':'"').$column.'":"'.$item[$column];
+                                                        $i++;
+                                                    }
+                                                    $otxt = $otxt.'"}';
+                                                ?>
+                                                data-item="{{$otxt}}"
+                                            @endisset
+                                            data-value="{{$item->id}}"
+                                            <?php
+                                            ?>
+                                            value="{{$txt}}">
+                                        </option>
+                                    @endif
                                 @endforeach
                             </datalist>
-                            <input v-on:change="inputSetUp('{{$key}}',$event, {{isset($param->share)}})" type="text" value="{{$base_value}}" list="datalist_{{$key}}" placeholder="Pilih {{$param->name}}" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
-                            <input id="{{$key}}" name="{{$key}}" value="{{$datas[$key]}}" hidden>
+                            <input @if($detail)readonly @endif v-on:change="inputSetUp('{{$key}}',$event, {{isset($param->share)}})" type="text" value="{{$base_value}}" list="datalist_{{$key}}" placeholder="Pilih {{$param->name}}" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">
+                            <input id="{{$key}}" name="{{$key}}" value="{{$datas[$param->by]}}" hidden>
                         @break
                         @case('Total')
+                            <?php
+                                $def = 1;
+                                foreach($param->from as $xvar){
+                                    $def = $def * $datas[$xvar];
+                                }
+                            ?>
                             <input
                                 disabled
                                 from="{{json_encode($param->from)}}"
                                 id="{{$key}}"
                                 name="{{$key}}"
+                                value="{{$def}}"
                                 class="bg-gray-100 rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"
                             />
                         @break
                         @case('TextArea')
-                            <textarea id="{{$key}}" name="{{$key}}" type="textarea" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">{{$datas[$key]}}</textarea>
+                            <textarea
+                                id="{{$key}}"
+                                name="{{$key}}"
+                                type="textarea"
+                                @if($detail)readonly @endif
+                                class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition">{{$datas[$param->by]}}</textarea>
                         @break
                         @case('Upload')
                             <div class="inline-flex col-start-2 col-end-7">
@@ -221,10 +275,27 @@
                             </div>
                         @break
                         @case('Date')
-                            <input id="{{$key}}" name="{{$key}}" value="{{$datas[$key]}}" type="date" v-on:change="onlyDate($event)" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                            @if($detail)
+                                <input
+                                    value="{{date('j F, Y', strtotime($datas[$param->by]))}}"
+                                    type="text"
+                                    readonly
+                                    class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"
+                                />
+                            @else
+                                <input
+                                    id="{{$key}}"
+                                    name="{{$key}}"
+                                    value="{{$datas[$param->by]}}"
+                                    type="date"
+                                    @if($detail)readonly @endif
+                                    v-on:change="onlyDate($event)"
+                                    class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"
+                                />
+                            @endif
                         @break
                         @case('DateTime')
-                            <input id="{{$key}}" name="{{$key}}" value="{{date('Y-m-d\TH:i', strtotime($datas[$key]))}}" type="datetime-local" v-on:change="onlyDate($event)" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
+                            <input id="{{$key}}" name="{{$key}}" value="{{date('Y-m-d\TH:i', strtotime($datas[$param->by]))}}" type="datetime-local" v-on:change="onlyDate($event)" class="rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition"/>
                         @break
                         @default
                     @endswitch

@@ -12,6 +12,16 @@ var vue = new Vue({
         form : {},
     },
     methods:{
+        async downloadFile(name){
+            const requestOptions = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: name })
+            };
+            const response = await fetch("{!! url('/api/download_file') !!}", requestOptions);
+            const data = await response.json();
+            console.log(data);
+        },
         inputSetUp(key, $event, share){
             const hiddenInput = document.getElementById(key);
             const selected = document.querySelector("#datalist_"+key+" option[value='"+$event.target.value+"']");
@@ -103,7 +113,4 @@ var vue = new Vue({
         }
     }
 });
-// vue.$watch('getInputValue', function (key) {
-//     this.form[key] = $event.target.value;
-// })
 </script>

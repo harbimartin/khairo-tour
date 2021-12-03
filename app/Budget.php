@@ -18,6 +18,8 @@ class Budget extends Model{
         'budget_status',
         'proposed',
         'proposed_by',
+        'verified',
+        'verified_by',
         'created',
         'created_by',
         'note_reject'
@@ -36,5 +38,38 @@ class Budget extends Model{
     }
     public function items(){
         return $this->hasMany(BudgetItem::class, 't_budget_id', 'id');
+    }
+    public function services(){
+        return $this->hasManyThrough(BudgetService::class, BudgetItem::class, 't_budget_id', 't_budget_item_id', 'id', 'id');
+    }
+    public function getTotalPropose() {
+      return $this->items->sum(function($item) {
+        return $item->qty_proposed * $item->price_proposed;
+      });
+    }
+    public function getLevelPropose() {
+        $total = $this->getTotalPropose();
+        if ($total <= 100000000)    //100 juta
+            return 4;
+        if ($total <= 500000000)    //100 Juta < Total <= 500 Juta
+            return 3;
+        if ($total <= 5000000000)   //500 Juta < Total <= 5 Miliar
+            return 2;
+        return 1;
+    }
+    public function getTotalVerify() {
+      return $this->items->sum(function($item) {
+        return $item->qty_proposed * $item->price_verified;
+      });
+    }
+    public function getLevelVerify() {
+        $total = $this->getTotalVerify();
+        if ($total <= 100000000)    //100 juta
+            return 8;
+        if ($total <= 500000000)    //100 Juta < Total <= 500 Juta
+            return 7;
+        if ($total <= 5000000000)   //500 Juta < Total <= 5 Miliar
+            return 6;
+        return 5;
     }
 }

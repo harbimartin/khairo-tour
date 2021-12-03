@@ -3,21 +3,24 @@
     <?php
         $title = 'MEMO REALISASI ANGGARAN';
         $code = 'MRA';
-        $column = [
-            'seq_no'=> [ 'name'=>'Item<br>No.', 'align'=>'center', 'type'=>'Number'],
-            'short_text'=> [ 'name'=>'Description Barang / Jasa' ],
-            'delivery_date_exp'=> [ 'name'=>'Deliv. Date', 'align'=>'center', 'type'=>'Date'],
-            'purchase_groups'=> [ 'name'=>'PGr.', 'align'=>'center', 'type'=>'SString', 'child'=>'purchase_group'],
-            'qty_proposed'=> [ 'name'=>'Qty', 'align'=>'center', 'type'=>'Float'],
-            'uom'=> [ 'name'=>'UoM', 'align'=>'center', 'type'=>'SString', 'child'=>'unit_measurement'],
-            'currencies'=> [ 'name'=>'Cur', 'align'=>'center', 'type'=>'SString', 'child'=>'currency'],
-            'price_proposed'=> [ 'name'=>'Price', 'align'=>'right', 'type'=>'Float', 'child'=>'code'],
-            'price_unit'=> [ 'name'=>'Unit<br>Price', 'align'=>'center', 'type'=>'Number'],
-            'amount'=> [ 'name'=>'Amount', 'align'=>'center', 'type'=>'Float'],
-            'gl_accounts'=> [ 'name'=>'G/L. Account'],
-            'cost_centers'=> [ 'name'=>'Cost Center'],
-            'internal_orders'=> [ 'name'=>'IO / WO'],
-        ]
+        $isVerify = $purpose != "Approve";
+        $column['seq_no'] = [ 'name'=>'Item<br>No.', 'align'=>'center', 'type'=>'Number'];
+        $column['short_text'] = [ 'name'=>'Description Barang / Jasa' ];
+        $column['delivery_date_exp'] = [ 'name'=>'Deliv. Date', 'align'=>'center', 'type'=>'Date'];
+        $column['purchase_groups'] = [ 'name'=>'PGr.', 'align'=>'center', 'type'=>'SString', 'child'=>'purchase_group'];
+        $column['qty_proposed'] = [ 'name'=>'Qty', 'align'=>'center', 'type'=>'Float'];
+        $column['uom'] = [ 'name'=>'UoM', 'align'=>'center', 'type'=>'SString', 'child'=>'unit_measurement'];
+        $column['currencies'] = [ 'name'=>'Cur', 'align'=>'center', 'type'=>'SString', 'child'=>'currency'];
+        $column['price_proposed'] = [ 'name'=>'Price'.($isVerify ? '<br>Proposed':''), 'align'=>'right', 'type'=>'Float', 'bolder'=>$isVerify];
+        if ($isVerify)
+            $column['price_verified'] = [ 'name'=>'Price<br>Verified', 'align'=>'right', 'type'=>'Float', 'bolder'=>true];
+        $column['price_unit'] = [ 'name'=>'Unit<br>Price', 'align'=>'center', 'type'=>'Number'];
+        $column['amount_proposed'] = [ 'name'=>'Amount'.($isVerify ? '<br>Proposed':''), 'align'=>'center', 'type'=>'Float','bolder'=> $isVerify];
+        if ($isVerify)
+            $column['amount_verified'] = [ 'name'=>'Amount<br>Verified', 'align'=>'center', 'type'=>'Float','bolder'=>true];
+        $column['gl_accounts'] = [ 'name'=>'G/L. Account'];
+        $column['cost_centers'] = [ 'name'=>'Cost Center'];
+        $column['internal_orders'] = [ 'name'=>'IO / WO'];
         // foreach($data->items as $item){
         //     $item['amount'] = $item['eprice'] * $item['uprice'];
         // }
@@ -65,7 +68,7 @@
                         <thead class="bg-gray-50">
                         <tr>
                             @foreach ($column as $key => $param)
-                                <th class="px-2 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider {{ isset($param->align) ? "text-".$param->align : ''}}">
+                                <th class="px-2 py-3 text-xs text-gray-500 uppercase tracking-wider {{ isset($param['align']) ? "text-".$param['align'] : ''}} {{ isset($param['class']) ? $param['class'] : ''}} {{ isset($param['bolder']) ? 'font-semibold' : 'font-medium'}}">
                                     {!! $param['name'] !!}
                                 </th>
                             @endforeach
@@ -75,7 +78,7 @@
                             @foreach ($data->items as $item)
                                 <tr>
                                     @foreach ($column as $key => $param)
-                                        <td class="px-2 pt-4 whitespace-nowrap {{ isset($param->align) ? "text-".$param->align : ''}}">
+                                        <td class="px-2 pt-4 whitespace-nowrap {{ isset($param['align']) ? "text-".$param['align'] : ''}} {{isset($param['class']) ? $param['class'] : ''}} {{isset($param['bolder']) ? 'font-semibold' : ''}}">
                                             @isset($param['type'])
                                                 @switch($param['type'])
                                                     @case('Number')@case('String')
@@ -157,7 +160,7 @@
                                 @foreach ($item['service'] as $serv)
                                     <tr style="border-top-width: 0px;">
                                         @foreach ($column as $key => $param)
-                                            <td class="px-2 whitespace-nowrap text-xs text-gray-500 {{$loop->parent->last?'pb-4 ':''}} {{ isset($param->align) ? "text-".$param->align : ''}}">
+                                            <td class="px-2 whitespace-nowrap text-xs text-gray-500 {{$loop->parent->last?'pb-4 ':''}} {{ isset($param['align']) ? "text-".$param['align'] : ''}}">
                                                 @isset($serv[$key])
                                                     @isset($param['type'])
                                                         @switch($param['type'])
@@ -190,7 +193,7 @@
                                                                     <a href="{{Request::url().'?id='.$serv['id']}}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                                                 @break
                                                             @case('Direct')
-                                                                    <a href="{{$param->url.'/view'}}" class="text-indigo-600 hover:text-indigo-900">View</a>
+                                                                    <a href="{{$param['url'].'/view'}}" class="text-indigo-600 hover:text-indigo-900">View</a>
                                                                 @break
                                                             @default
                                                                     <div class="text-red-500">{{$serv[$key]}}</div>
@@ -212,14 +215,19 @@
                                     </tr>
                                 @endforeach
                             @endforeach
-                            <th colspan="9" class="text-xs font-medium text-gray-500 uppercase tracking-wider {{ isset($param->align) ? "text-".$param->align : ''}}">
+                            <th colspan="{{$isVerify ? 10:9}}" class="text-xs font-medium text-gray-500 uppercase tracking-wider {{ isset($param['align']) ? "text-".$param['align'] : ''}}">
                                 Total
                             </th>
-                            <th class="py-3 px-2 text-xs font-medium text-gray-900 text-left">
-                                {{ number_format($data->total,2,',','.')}}
+                            <th class="py-3 px-2 text-xs font-medium text-gray-900 text-center">
+                                {{ number_format($data->total_proposed,2,',','.')}}
                             </th>
+                            @if($isVerify)
+                                <th class="py-3 px-2 text-xs font-medium text-gray-900 text-center">
+                                    {{ number_format($data->total_verified,2,',','.')}}
+                                </th>
+                            @endif
                             {{-- @foreach ($column as $key => $param)
-                                <th class="px-2 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider {{ isset($param->align) ? "text-".$param->align : ''}}">
+                                <th class="px-2 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider {{ isset($param['align']) ? "text-".$param['align'] : ''}}">
                                     {!! $param['name'] !!}
                                 </th>
                             @endforeach --}}
@@ -245,6 +253,12 @@
             <div class="flex">
                 <div class="inline-flex mx-auto mt-10">
                     <input
+                        v-on:click="downloadFile('{{$data['budget_attachment']}}')"
+                        class="flex rounded border px-4 py-2 bg-blue-500 hover:bg-blue-600 ml-auto mr-5 cursor-pointer text-white font-semibold"
+                        type="button"
+                        value="Download Lampiran"
+                    />
+                    <input
                         v-on:click="onReject = true"
                         class="flex rounded border px-4 py-2 bg-red-500 hover:bg-red-600 ml-auto mr-5 cursor-pointer text-white font-semibold"
                         type="button"
@@ -256,7 +270,8 @@
                         name="type"
                         value="verifikasi"
                     >
-                    {{$purpose}}
+                    {{-- {{$purpose}} --}}
+                    Approve
                     </button>
                 </div>
             </div>

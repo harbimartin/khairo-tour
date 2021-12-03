@@ -4,12 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Budget;
 use App\BudgetItem;
-use App\BudgetPeriod;
 use App\BudgetService;
 use App\BudgetVersion;
-use App\InternalOrder;
 use App\InternalOrderRpt;
-use App\SapAccount;
 use App\SapCostCenter;
 use App\SapCurrency;
 use App\SapDocType;
@@ -17,9 +14,8 @@ use App\SapGlAccount;
 use App\SapUnitMeasure;
 use Exception;
 use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx\Rels;
 
-class PengajuanServiceController extends Controller
+class VerifikasiServiceController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,15 +30,14 @@ class PengajuanServiceController extends Controller
             $header = (object)['id'=>$data->t_budget_id];
             $item = [];
             $iselect = null;
-            $next_seq = $data['seq_no'];
         }else{
             if ($request->hid)
                 $header = Budget::find($request->hid);
             else
-                return redirect(url('/pengajuan'));
-            $item = BudgetItem::where(['t_budget_id'=>$request->hid, 'item_category'=>3])->get();
+                return redirect(url('/verifikasi'));
+            $item = BudgetItem::where(['t_budget_id'=>$request->hid, 'item_category'=>3])->whereHas('service')->get();
             if (sizeof($item) == 0)
-                return redirect(url('/pengajuan/item').'?hid='.$request->hid);
+                return redirect(url('/verifikasi/items').'?hid='.$request->hid);
             elseif ($request->iid){
                 $data = BudgetService::orderBy('seq_no')->where('t_budget_item_id',$request->iid)->with(['gl_accounts','cost_centers','internal_orders'])->get();
                 $iselect = $item->where('id',$request->iid)->first();
@@ -51,21 +46,18 @@ class PengajuanServiceController extends Controller
                 $data = BudgetService::orderBy('seq_no')->where('t_budget_item_id',$item[0]->id)->with(['gl_accounts','cost_centers','internal_orders'])->get();
                 $iselect = $item[0];
             }
-            $next_seq = (sizeof($data)>0) ? $data[sizeof($data)-1]['seq_no']+10 : 10;
         }
         $select = [
             'umeasure' => SapUnitMeasure::where('status', 1)->get(),
             'pr_doc' => SapDocType::where('status', 1)->get(),
             'currency' => SapCurrency::where('status',1)->get(),
             'budget_version' => BudgetVersion::where('status', 1)->get(),
-
             'items' => $item,
             'glaccount' => SapGlAccount::where('status', 1)->get(),
-            'costcenter' => SapCostCenter::where('status',1)->get(),//[['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
-            'internal' => InternalOrderRpt::whereNull('t_budget_id')->orWhere('t_budget_id',$request->hid)->get()//[['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
-
+            'costcenter' => SapCostCenter::where('status',1)->get(),
+            'internal' => InternalOrderRpt::whereNull('t_budget_id')->orWhere('t_budget_id',$request->hid)->get()
         ];
-        return view('pages.pengajuan.pservice', [ 'data' => $data , 'header'=>$header, 'select'=>$select, 'iselect'=>$iselect, 'next_seq'=>$next_seq, 'error'=>$error]);
+        return view('pages.verifikasi.vservice', [ 'data' => $data , 'header'=>$header, 'select'=>$select, 'iselect'=>$iselect, 'error'=>$error]);
     }
 
     /**
@@ -93,7 +85,7 @@ class PengajuanServiceController extends Controller
             // 'unit_qty'=>'required',
             'qty_proposed'=>'required',
             'price_proposed'=>'required',
-            // 'currency'=>'required',
+            'currency'=>'required',
             'gl_account'=>'required',
             'cost_center'=>'required',
         ]))
@@ -103,19 +95,14 @@ class PengajuanServiceController extends Controller
             $request['item_status'] = "Draft";
             $request['price_unit'] = 1;
             // if ($request->item_category == 3){
-                //    $request['short_text'] = $request->_short_text;
+                // $request['short_text'] = $request->_short_text;
             //     $request['material_group'] = $request->_material_group;
             //     $request['uom'] = $request->_uom;
             // }
             // if ($request->account_assignment != 1){
             //     $request['internal_order'] = null;
             // }
-            $item = BudgetItem::find($request->t_budget_item_id);
-            $item->service()->create($request->toArray());
-            // $item->update([
-            //     'price_proposed' => $item->getTotalProposed(),
-            //     'price_verified' => $item->getTotalVerified()
-            // ]);
+            BudgetService::create($request->toArray());
         }catch(Exception $th){
             return $this->index($request, $th->getMessage());
         }
@@ -153,11 +140,14 @@ class PengajuanServiceController extends Controller
      */
     public function update(Request $request, $id){
         try{
-            BudgetService::find($id)->update($request->toArray());
-            // $item = $service->item;
-            // $item->update([
-            //     'price_proposed' => $item->getTotalProposed()
-            // ]);
+            $up = [
+                'gl_account' => $request->gl_account,
+                'cost_center' => $request->cost_center,
+                'internal_order' => $request->internal_order,
+                'price_verified' => $request->price_verified
+            ];
+            $service = BudgetService::find($id);
+            $service->update($up);
         } catch(Exception $th){
             return $this->index($request, $th->getMessage());
         }

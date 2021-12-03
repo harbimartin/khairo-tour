@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Budget;
 use App\BudgetItem;
-use App\BudgetPeriod;
 use App\BudgetVersion;
-use App\InternalOrder;
 use App\InternalOrderRpt;
 use App\SapAccount;
 use App\SapCostCenter;
@@ -21,7 +19,7 @@ use App\SapUnitMeasure;
 use Exception;
 use Illuminate\Http\Request;
 
-class PengajuanItemController extends Controller
+class VerifikasiItemController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -31,22 +29,24 @@ class PengajuanItemController extends Controller
     public function index(Request $request, $error = ''){
         if ($length = $request->el)
             $length = 10;
+        $next_seq = 0;
+        $next_package = 0;
         if ($request->id){
             $data = BudgetItem::where('id',$request->id)->first();
             $header = (object)['id'=>$data->t_budget_id];
             $request['hid'] = $data->t_budget_id;
-            $next_seq = $data['seq_no'];
-            $next_package = $data['package_no'];
+            $next_seq = (sizeof($data)>0) ? $data[sizeof($data)-1]['seq_no']+10 : 10;
+            $next_package = (sizeof($data)>0) ? $data[sizeof($data)-1]['package_no']+1 : 1;
         }else{
-            $data = BudgetItem::orderBy('seq_no')->where('t_budget_id',$request->hid)->with(['purchase_groups', 'item_categories'])->get();
+            $data = BudgetItem::latest('id')->where('t_budget_id',$request->hid)->with(['purchase_groups', 'item_categories'])->get();
             if ($request->hid){
                 $header = Budget::find($request->hid);
+                $header->doc_types;
+                $header->budget_versions;
                 // if ($header->budget_versions->division_id != $_SESSION['ebudget_division_id'])
                 //     return "Maaf kamu tidak bisa mengakses Laman ini";
             }else
-                return redirect(url('/pengajuan'));
-            $next_seq = (sizeof($data)>0) ? $data[sizeof($data)-1]['seq_no']+10 : 10;
-            $next_package = (sizeof($data)>0) ? $data[sizeof($data)-1]['package_no']+1 : 1;
+                return redirect(url('/verifikasi'));
         }
         $select = [
             'pr_doc' => SapDocType::where('status',1)->get(),
@@ -62,7 +62,7 @@ class PengajuanItemController extends Controller
             'costcenter' => SapCostCenter::where('status',1)->get(),//[['id'=>1,'name'=>'Cost Center 1'],['id'=>2, 'name'=>'Cost Center 2']],
             'internal' => InternalOrderRpt::whereNull('t_budget_id')->orWhere('t_budget_id',$request->hid)->get()//[['id'=>1,'name'=>'Internal 1'],['id'=>2, 'name'=>'Internal 2']],
         ];
-        return view('pages.pengajuan.pitem', [ 'data' => $data , 'header' => $header,'select'=>$select, 'next_seq'=>$next_seq, 'next_package'=>$next_package, 'error'=>$error]);
+        return view('pages.verifikasi.vitem', [ 'data' => $data , 'header' => $header,'select'=>$select, 'next_seq'=>$next_seq, 'next_package'=>$next_package, 'error'=>$error]);
     }
 
     /**
@@ -82,42 +82,7 @@ class PengajuanItemController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
-        $request['hid'] = $request->t_budget_id;
-        if ($validate = $this->validing($request->all(), [
-            'hid'=>'required',
-            'seq_no'=>'required',
-            'purchase_group'=>'required',
-            'item_category'=>'required',
-            'account_assignment'=>'required',
-            'request_date'=>'required',
-            // 'package_no'=>'required',
-            'qty_proposed'=>'required',
-            'price_proposed'=>'required',
-            'currency'=>'required',
-            'delivery_date_exp'=>'required',
-            // 'note_item'=>'required',
-        ]))
-            return $this->index($request, $validate);
-        try{
-            $request['t_budget_id'] = $request->hid;
-            $request['plant'] = "KBS1";
-            $request['item_status'] = "Draft";
-            $request['price_unit'] = "1";
-            if ($request->item_category == 3){
-                $request['short_text'] = $request->_short_text;
-                $request['material_group'] = $request->_material_group;
-                $request['unit_qty'] = $request->_unit_qty;
-                $request['price_proposed'] = 0;
-                $request['internal_order'] = null;
-            }else
-            if ($request->account_assignment != 1){
-                $request['internal_order'] = null;
-            }
-            BudgetItem::create($request->toArray());
-        }catch(Exception $th){
-            return $this->index($request, $th->getMessage());
-        }
-        return redirect($request->url().'?hid='.$request->hid);
+        //
     }
 
     /**
@@ -151,18 +116,18 @@ class PengajuanItemController extends Controller
      */
     public function update(Request $request, $id){
         try{
-            if ($request->item_category == 3){
-                $request['material_no'] = null;
-                $request['short_text'] = $request->_short_text;
-                $request['material_group'] = $request->_material_group;
-                $request['unit_qty'] = $request->_unit_qty;
-                $request['price_proposed'] = 0;
-                $request['internal_order'] = '';
-            }else
-            if ($request->account_assignment != 1){
-                $request['internal_order'] = '';
-            }
-            BudgetItem::find($id)->update($request->toArray());
+            // return $request->toArray();
+            $up = [
+                'material group' => $request->material_group,
+                'gl_account' => $request->gl_account,
+                'cost_center' => $request->cost_center,
+                'internal_order' => $request->internal_order,
+                'price_verified' => $request->price_verified
+            ];
+            $budget = BudgetItem::find($id);
+            if ($budget->item_category == 3)
+                $up['price_verified'] = 0;
+            $budget->update($up);
         } catch(Exception $th){
             return $this->index($request, $th->getMessage());
         }

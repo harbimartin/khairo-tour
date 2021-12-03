@@ -18,8 +18,12 @@ class BudgetService extends Model{
         'gl_account',
         'cost_center',
         'internal_order',
-        'item_status'
+        'item_status',
+        'price_verified'
     ];
+    public function item(){
+        return $this->hasOne(BudgetItem::class, 'id', 't_budget_item_id');
+    }
     public function uom(){
         return $this->hasOne(SapUnitMeasure::class, 'id', 'unit_qty');
     }

@@ -1,9 +1,6 @@
 @extends('index')
 @section('content')
     @isset(request()->id)
-        awkodkiawdoiad
-        {{$data}}
-
         <?php
             $column = json_encode([
                 'name'=>[ 'name'=>"Receiver", 'type'=>'String', 'full'=>true],
@@ -15,6 +12,9 @@
                 'created_at'=>[ 'name'=>"Created", 'type'=>'DateTime'],
                 'updated_at'=>[ 'name'=>"Update", 'type'=>'DateTime']
             ]);
+            foreach(json_decode($data['body']) as $object){
+                $arrays[] =  (array) $object;
+            }
         ?>
         <x-update
             title="Email Detail"
@@ -23,10 +23,11 @@
             :detail="true"
         >
         </x-update>
-        @extends($data['view'], $data['body']6);
+        {{-- @extends($data['view'], $arrays); --}}
     @else
         <?php
             $column_table = json_encode([
+                'created_at'=>[ 'name'=>"Date", 'type'=>'DateTime'],
                 'name'=>[ 'name'=>"Receiver", 'type'=>'String'],
                 'receiver'=>[ 'name'=>"Email", 'type'=>'String'],
                 'title'=>[ 'name'=>"Title", 'type'=>'String'],
