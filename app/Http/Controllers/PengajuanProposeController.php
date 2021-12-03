@@ -48,7 +48,7 @@ class PengajuanProposeController extends Controller
         ];
         $select = array_merge($select, $user);
         // return $select;
-        return view('pages.pengajuan.propose', [ 'data' => $data , 'level'=>$level, 'total'=>$header->getTotalPropose(),  'header'=>$header, 'select'=>$select, 'error'=>$error]);
+        return view('pages.pengajuan.propose', [ 'data' => $data , 'level'=>$level, 'total'=>$header->total_proposed,  'header'=>$header, 'select'=>$select, 'error'=>$error]);
     }
 
     /**

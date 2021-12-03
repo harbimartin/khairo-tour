@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class BudgetItem extends Model{
     public $table = 't_budget_item_tab';
     public $timestamps = false;
+    protected $appends = ['total_proposed','total_verified'];
     public $fillable =[
         't_budget_id',
         'seq_no',
@@ -33,12 +34,18 @@ class BudgetItem extends Model{
         'item_status',
         'price_verified'
     ];
-    // public static function boot(){
-    //     parent::boot();
-    //     static::creating(function ($model) {
-    //         $model->created_at = $model->freshTimestamp();
-    //     });
-    // }
+    public function getTotalProposedAttribute(){
+        $v = $this->service->sum('total_proposed');
+        return $v ? $v : $this->price_proposed;
+    }
+    public function getTotalVerifiedAttribute(){
+        $v = $this->service->sum('total_verified');
+        return $v ? $v : $this->price_verified;
+    }
+    public $hidden = [
+        'total_proposed',
+        'total_verified'
+    ];
     public function accounts(){
         return $this->hasOne(SapAccount::class, 'id', 'account_assignment');
     }
@@ -69,15 +76,18 @@ class BudgetItem extends Model{
     public function service(){
         return $this->hasMany(BudgetService::class, 't_budget_item_id', 'id');
     }
+    public function budget(){
+        return $this->hasOne(Budget::class, 'id', 't_budget_id');
+    }
 
-    public function getTotalProposed() {
-        return $this->service->sum(function($item) {
-          return $item->qty_proposed * $item->price_proposed;
-        });
-    }
-    public function getTotalVerified() {
-        return $this->service->sum(function($item) {
-          return $item->qty_proposed * $item->price_verified;
-        });
-    }
+    // public function getTotalProposed() {
+    //     return $this->service->sum(function($item) {
+    //       return $item->qty_proposed * $item->price_proposed;
+    //     });
+    // }
+    // public function getTotalVerified() {
+    //     return $this->service->sum(function($item) {
+    //       return $item->qty_proposed * $item->price_verified;
+    //     });
+    // }
 }

@@ -24,4 +24,4 @@ Route::get('budget_notif','PengajuanController@budget_notif_rpt');
 Route::get('budget_notif/count','PengajuanController@budget_notif_count');
 Route::get('budget_detail','PengajuanController@budget_detail');
 Route::post('budget_approve','PersetujuanController@update_exec');
-Route::get('download_file', 'PengajuanController@download');
+Route::post('download_file', 'PengajuanController@download');

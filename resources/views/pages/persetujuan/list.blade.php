@@ -11,13 +11,13 @@
         $column['qty_proposed'] = [ 'name'=>'Qty', 'align'=>'center', 'type'=>'Float'];
         $column['uom'] = [ 'name'=>'UoM', 'align'=>'center', 'type'=>'SString', 'child'=>'unit_measurement'];
         $column['currencies'] = [ 'name'=>'Cur', 'align'=>'center', 'type'=>'SString', 'child'=>'currency'];
-        $column['price_proposed'] = [ 'name'=>'Price'.($isVerify ? '<br>Proposed':''), 'align'=>'right', 'type'=>'Float', 'bolder'=>$isVerify];
+        $column['total_proposed'] = [ 'name'=>'Price'.($isVerify ? '<br>Proposed':''), 'align'=>'right', 'type'=>'Float', 'bolder'=>$isVerify];
         if ($isVerify)
-            $column['price_verified'] = [ 'name'=>'Price<br>Verified', 'align'=>'right', 'type'=>'Float', 'bolder'=>true];
+            $column['total_verified'] = [ 'name'=>'Price<br>Verified', 'align'=>'right', 'type'=>'Float', 'bolder'=>true];
         $column['price_unit'] = [ 'name'=>'Unit<br>Price', 'align'=>'center', 'type'=>'Number'];
-        $column['amount_proposed'] = [ 'name'=>'Amount'.($isVerify ? '<br>Proposed':''), 'align'=>'center', 'type'=>'Float','bolder'=> $isVerify];
+        $column['total_proposed'] = [ 'name'=>'Amount'.($isVerify ? '<br>Proposed':''), 'align'=>'center', 'type'=>'Float','bolder'=> $isVerify];
         if ($isVerify)
-            $column['amount_verified'] = [ 'name'=>'Amount<br>Verified', 'align'=>'center', 'type'=>'Float','bolder'=>true];
+            $column['total_verified'] = [ 'name'=>'Amount<br>Verified', 'align'=>'center', 'type'=>'Float','bolder'=>true];
         $column['gl_accounts'] = [ 'name'=>'G/L. Account'];
         $column['cost_centers'] = [ 'name'=>'Cost Center'];
         $column['internal_orders'] = [ 'name'=>'IO / WO'];
@@ -138,7 +138,7 @@
                                                         @isset($item["cost_centers"])
                                                             <div class="text-sm text-gray-900">{{$item["cost_centers"]['cost_center']}}</div>
                                                             <div class="text-xs text-gray-900">
-                                                                {{$item["cost_centers"]['cost_center']}}
+                                                                {{$item["cost_centers"]['cost_center_desc']}}
                                                             </div>
                                                         @endisset
                                                         @break
@@ -208,6 +208,32 @@
                                                             <div class="text-sm">[{{$serv['seq_no']}}] {{ $serv[$key] }}</div>
                                                         @endisset
                                                         @break
+                                                    @case('gl_accounts')
+                                                        {{-- @isset($item["gl_accounts"]["gl_account"]) --}}
+                                                            <div class="text-sm text-gray-900">{{$serv["gl_accounts"]['gl_account']}}</div>
+                                                            <div class="text-xs text-gray-900">
+                                                                {{-- {{$serv["assign"]['gla']['title']}}<br>
+                                                                - {{$serv["assign"]['gla']['point']}} --}}
+                                                                {{$serv["gl_accounts"]["gl_account_desc"]}}
+                                                            </div>
+                                                        {{-- @endisset --}}
+                                                        @break
+                                                    @case('cost_centers')
+                                                        {{-- @isset($serv["cost_centers"]) --}}
+                                                            <div class="text-sm text-gray-900">{{$serv["cost_centers"]['cost_center']}}</div>
+                                                            <div class="text-xs text-gray-900">
+                                                                {{$serv["cost_centers"]['cost_center_desc']}}
+                                                            </div>
+                                                        {{-- @endisset --}}
+                                                        @break
+                                                    @case('internal_orders')
+                                                        {{-- @isset($item["internal_orders"]) --}}
+                                                            <div class="text-sm text-gray-900">{{$serv["internal_orders"]['io_code']}}</div>
+                                                            {{-- <div class="text-xs text-gray-900">
+                                                                {{$item["assign"]['cc']['division']}}
+                                                            </div> --}}
+                                                        {{-- @endisset --}}
+                                                        @break
                                                     @default
                                                 @endswitch
                                             </td>
@@ -215,7 +241,7 @@
                                     </tr>
                                 @endforeach
                             @endforeach
-                            <th colspan="{{$isVerify ? 10:9}}" class="text-xs font-medium text-gray-500 uppercase tracking-wider {{ isset($param['align']) ? "text-".$param['align'] : ''}}">
+                            <th colspan="{{$isVerify ? 7:7}}" class="text-xs font-medium text-gray-500 uppercase tracking-wider {{ isset($param['align']) ? "text-".$param['align'] : ''}}">
                                 Total
                             </th>
                             <th class="py-3 px-2 text-xs font-medium text-gray-900 text-center">

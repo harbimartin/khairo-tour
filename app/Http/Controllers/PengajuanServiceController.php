@@ -99,6 +99,10 @@ class PengajuanServiceController extends Controller
         ]))
             return $this->index($request, $validate);
         try{
+            $budget = BudgetItem::find($request->t_budget_item_id);
+            if ($budget->budget->account_assignment !=1 ){
+                $request['internal_order'] = null;
+            }
             $request['t_budget_item_id'] = $request->iid;
             $request['item_status'] = "Draft";
             $request['price_unit'] = 1;
@@ -153,11 +157,11 @@ class PengajuanServiceController extends Controller
      */
     public function update(Request $request, $id){
         try{
+            $budget = BudgetItem::find($request->t_budget_item_id);
+            if ($budget->budget->account_assignment !=1 ){
+                $request['internal_order'] = null;
+            }
             BudgetService::find($id)->update($request->toArray());
-            // $item = $service->item;
-            // $item->update([
-            //     'price_proposed' => $item->getTotalProposed()
-            // ]);
         } catch(Exception $th){
             return $this->index($request, $th->getMessage());
         }

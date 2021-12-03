@@ -37,7 +37,7 @@ class VerifikasiProposeController extends Controller
             }
         }
         // return $select;
-        return view('pages.verifikasi.vpropose', [ 'data' => $data , 'level'=>$level, 'total'=>$header->getTotalVerify(),'header'=>$header, 'select'=>$select, 'error'=>$error]);
+        return view('pages.verifikasi.vpropose', [ 'data' => $data , 'level'=>$level, 'total'=>$header->total_verified,'header'=>$header, 'select'=>$select, 'error'=>$error]);
     }
 
     /**

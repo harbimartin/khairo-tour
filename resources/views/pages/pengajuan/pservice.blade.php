@@ -20,10 +20,10 @@
             'hid'=>[ 'type'=>'Static', 'def'=> request()->hid, 'class'=>'hidden'],
         ];
         if (isset(request()->id)){
-            $column['item'] = [ 'name'=>"Item", 'type'=>'SString', 'by'=>'item', 'child'=>['material_group','short_text'], 'full'=>true];
+            $column['item'] = [ 'name'=>"Item", 'type'=>'SString', 'by'=>'item', 'child'=>['seq_no','short_text'], 'full'=>true];
             $column['t_budget_item_id'] = [ 'type'=>'Static', 'def'=> $data['t_budget_item_id'], 'class'=>'hidden'];
         }else{
-            $column['item'] = [ 'name'=>"Item", 'type'=>'Select', 'api'=>'items', 'val'=>['material_group','short_text'], 'direct'=>'hid='.request()->hid.'&iid', 'full'=>true, 'req'=> true, 'def'=>request()->iid];
+            $column['item'] = [ 'name'=>"Item", 'type'=>'Select', 'api'=>'items', 'val'=>['seq_no','short_text'], 'direct'=>'hid='.request()->hid.'&iid', 'full'=>true, 'req'=> true, 'def'=>request()->iid];
         }
         $column = json_encode($column);
         $column_table = [

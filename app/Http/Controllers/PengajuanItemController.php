@@ -20,6 +20,7 @@ use App\SapPurchaseGroup;
 use App\SapUnitMeasure;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PengajuanItemController extends Controller
 {
@@ -38,7 +39,11 @@ class PengajuanItemController extends Controller
             $next_seq = $data['seq_no'];
             $next_package = $data['package_no'];
         }else{
-            $data = BudgetItem::orderBy('seq_no')->where('t_budget_id',$request->hid)->with(['purchase_groups', 'item_categories'])->get();
+            $data = BudgetItem::orderBy('seq_no')->where('t_budget_id',$request->hid)->with(['purchase_groups', 'item_categories'])->get()->each(
+                function($i){
+                    $i->makeVisible(['total_proposed']);
+                }
+            );
             if ($request->hid){
                 $header = Budget::find($request->hid);
                 // if ($header->budget_versions->division_id != $_SESSION['ebudget_division_id'])
@@ -109,6 +114,7 @@ class PengajuanItemController extends Controller
                 $request['unit_qty'] = $request->_unit_qty;
                 $request['price_proposed'] = 0;
                 $request['internal_order'] = null;
+                $request['gl_account'] = null;
             }else
             if ($request->account_assignment != 1){
                 $request['internal_order'] = null;
@@ -150,22 +156,24 @@ class PengajuanItemController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id){
-        try{
+        // try{
+            $up = $request->toArray();
             if ($request->item_category == 3){
-                $request['material_no'] = null;
-                $request['short_text'] = $request->_short_text;
-                $request['material_group'] = $request->_material_group;
-                $request['unit_qty'] = $request->_unit_qty;
-                $request['price_proposed'] = 0;
-                $request['internal_order'] = '';
+                $up['material_no'] = null;
+                $up['short_text'] = $request->_short_text;
+                $up['material_group'] = $request->_material_group;
+                $up['unit_qty'] = $request->_unit_qty;
+                $up['price_proposed'] = 0;
+                $up['gl_account'] = null;
             }else
             if ($request->account_assignment != 1){
-                $request['internal_order'] = '';
+                $up['internal_order'] = null;
             }
-            BudgetItem::find($id)->update($request->toArray());
-        } catch(Exception $th){
-            return $this->index($request, $th->getMessage());
-        }
+            $budget = BudgetItem::find($id);
+            $budget->update($up);
+        // } catch(Exception $th){
+        //     return $this->index($request, $th->getMessage());
+        // }
         return redirect($request->_next);
     }
 

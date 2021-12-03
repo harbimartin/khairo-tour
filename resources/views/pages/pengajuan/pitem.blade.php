@@ -39,7 +39,7 @@
             'item_categories'=>[ 'name'=>"Item Category", 'type'=>'SString', 'child'=>'item_category_desc'],
             'short_text'=>[ 'name'=>"Short Text", 'type'=>'String'],
             'qty_proposed'=>[ 'name'=>"Quantity", 'type'=>'String'],
-            'price_proposed'=>[ 'name'=>"Price", 'type'=>'Money'],
+            'total_proposed'=>[ 'name'=>"Price", 'type'=>'Money'],
             'request_date'=>[ 'name'=>"Request Date", 'type'=>'Date'],
             // 'package_no'=>[ 'name'=>"Package Number", 'type'=>'String'],
             'item_status'=>[ 'name'=>"Status", 'type'=>'State'],

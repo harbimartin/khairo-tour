@@ -13,12 +13,12 @@
             'unit_qty'=>[ 'name'=>"Unit of Measure", 'type'=>'SString', 'by'=>'uom', 'child'=>['unit_measurement','unit_measurement_desc'], 'def'=>17],
             '__'=>['type'=>'Space'],
             'gl_account'=>[ 'name'=>"GL Account", 'type'=>'Select', 'api'=>'glaccount', 'val'=>['gl_account','gl_account_desc'], 'req'=> true ],
-            'cost_center'=>[ 'name'=>"Cost Center", 'type'=>'Select', 'api'=>'costcenter', 'val'=>['cost_center','cost_center_desc'], 'req'=> false ],
-            'internal_order'=>[ 'name'=>'Internal Order', 'type'=>'Select', 'api'=>'internal', 'val'=>['io_code','io_date'], 'req'=> false, 'class' => ($iselect['account_assignment'] !=1 ? 'hidden':'')],
+            'cost_center'=>[ 'name'=>"Cost Center", 'type'=>'Select', 'api'=>'costcenter', 'val'=>['cost_center','cost_center_desc'], 'req'=> false , 'null'=>true],
+            'internal_order'=>[ 'name'=>'Internal Order', 'type'=>'Select', 'api'=>'internal', 'val'=>['io_code','io_date'], 'req'=> false, 'class' => ($iselect['account_assignment'] !=1 ? 'hidden':'') , 'null'=>true],
             'seq_no'=>[ 'type'=>'Static', 'def'=> (is_array($data) ? 10+sizeof($data)*10 : 0), 'class'=>'hidden'],
             't_budget_item_id'=>[ 'type'=>'Static', 'def'=> request()->iid, 'class'=>'hidden'],
             'hid'=>[ 'type'=>'Static', 'def'=> request()->hid, 'class'=>'hidden'],
-            'price_verified'=>[ 'name'=>"Price Verified", 'type'=>'Number', 'req'=> false ],
+            'price_verified'=>[ 'name'=>"Price Verified", 'type'=>'Number', 'force'=>true, 'req'=> false ],
         ];
         if (isset(request()->id)){
             $column['item'] = [ 'name'=>"Item", 'type'=>'SString', 'by'=>'item', 'child'=>['material_group','short_text'], 'full'=>true];
@@ -55,7 +55,15 @@
             :data="$data"
             :select="$select"
             :error="$error"
+            :detail="true"
         >
+            <button
+                class="rounded border px-4 py-2 bg-green-500 hover:bg-green-600 ml-auto mr-5 cursor-pointer text-white font-semibold"
+                type="submit"
+                name="__type"
+                value="revised"
+            > Update
+            </button>
         </x-update>
     @else
         <x-table
@@ -72,7 +80,7 @@
                 >
                 @foreach ($select['items'] as $item)
                     <option value={{$item['id']}} {{request()->iid==$item['id'] ? 'selected': ''}}>
-                        {{$item['material_group']}} - {{$item['short_text']}}
+                        {{$item['seq_no']}} - {{$item['short_text']}}
                     </option>
                 @endforeach
             </select>

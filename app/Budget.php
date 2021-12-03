@@ -24,11 +24,18 @@ class Budget extends Model{
         'created_by',
         'note_reject'
     ];
+    protected $appends = ['total_proposed','total_verified'];
     public static function boot(){
         parent::boot();
         static::creating(function ($model) {
             $model->created = $model->freshTimestamp();
         });
+    }
+    public function getTotalProposedAttribute(){
+        return $this->items->sum('total_proposed');
+    }
+    public function getTotalVerifiedAttribute(){
+        return $this->items->sum('total_verified');
     }
     public function doc_types(){
         return $this->hasOne(SapDocType::class, 'id', 'document_type');

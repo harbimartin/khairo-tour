@@ -29,22 +29,26 @@ class VerifikasiItemController extends Controller
     public function index(Request $request, $error = ''){
         if ($length = $request->el)
             $length = 10;
-        $next_seq = 0;
-        $next_package = 0;
         if ($request->id){
             $data = BudgetItem::where('id',$request->id)->first();
             $header = (object)['id'=>$data->t_budget_id];
             $request['hid'] = $data->t_budget_id;
-            $next_seq = (sizeof($data)>0) ? $data[sizeof($data)-1]['seq_no']+10 : 10;
-            $next_package = (sizeof($data)>0) ? $data[sizeof($data)-1]['package_no']+1 : 1;
+            $next_seq = $data['seq_no'];
+            $next_package = $data['package_no'];
         }else{
-            $data = BudgetItem::latest('id')->where('t_budget_id',$request->hid)->with(['purchase_groups', 'item_categories'])->get();
+            $data = BudgetItem::latest('id')->where('t_budget_id',$request->hid)->with(['purchase_groups', 'item_categories'])->get()->each(
+                function($i){
+                    $i->makeVisible(['total_proposed','total_verified']);
+                }
+            );
             if ($request->hid){
                 $header = Budget::find($request->hid);
                 $header->doc_types;
                 $header->budget_versions;
                 // if ($header->budget_versions->division_id != $_SESSION['ebudget_division_id'])
                 //     return "Maaf kamu tidak bisa mengakses Laman ini";
+                $next_seq = (sizeof($data)>0) ? $data[sizeof($data)-1]['seq_no']+10 : 10;
+                $next_package = (sizeof($data)>0) ? $data[sizeof($data)-1]['package_no']+1 : 1;
             }else
                 return redirect(url('/verifikasi'));
         }

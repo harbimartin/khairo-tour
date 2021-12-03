@@ -184,21 +184,24 @@ class PengajuanController extends Controller
             $q->orderBy('seq_no')->with(['accounts','materials','purchase_groups','item_categories','currencies','uom','gl_accounts','internal_orders','cost_centers','service'=>function($q){
                 $q->with(['uom','gl_accounts','internal_orders','cost_centers']);
             }]);
-        }])->first();
-        $total_proposed = 0;
-        $total_verified = 0;
-        foreach($data->items as $key => $item){
-            $data->items[$key]['amount_proposed'] = $count_proposed = $item['price_proposed'] * $item['qty_proposed'];
-            $data->items[$key]['amount_verified'] = $count_verified = $item['price_verified'] * $item['qty_proposed'];
-            $total_proposed += $count_proposed;
-            $total_verified += $count_verified;
-            foreach($item['service'] as $keys => $iteme){
-                $data->items[$key]['service'][$keys]['amount_proposed'] = $iteme['price_proposed'] * $item['qty_proposed'];
-                $data->items[$key]['service'][$keys]['amount_verified'] = $iteme['price_verified'] * $item['qty_proposed'];
-            }
-        }
-        $data->total_proposed = $total_proposed;
-        $data->total_verified = $total_verified;
+        }])->first()->makeVisible(['total_proposed','total_verified']);
+        $data->items->each(function($q){
+            return $q->makeVisible(['total_proposed','total_verified']);
+        });
+        // $total_proposed = 0;
+        // $total_verified = 0;
+        // foreach($data->items as $key => $item){
+        //     $count_serv_propose = $item['price_proposed'];
+        //     $count_serv_verif = $item['price_verified'];
+        //     foreach($item['service'] as $iteme){
+        //         $count_serv_propose += $iteme['price_proposed'];
+        //         $count_serv_verif += $iteme['price_verified'];
+        //     }
+        //     $data->items[$key]['price_proposed'] = $count_serv_propose;
+        //     $data->items[$key]['price_verified'] = $count_serv_verif;
+        //     $total_proposed += $data->items[$key]['amount_proposed'] = $count_serv_propose * $iteme['qty_proposed'];
+        //     $total_verified += $data->items[$key]['amount_verified'] = $count_serv_verif * $iteme['qty_proposed'];
+        // }
         if ($api)
             return $this->resSuccess('Memo Realisasi Anggaran',$data);
         else
