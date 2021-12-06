@@ -52,13 +52,13 @@ class Budget extends Model{
     public function files(){
         return $this->hasOne(File::class, 'id', 'budget_attachment');
     }
-    public function getTotalPropose() {
-      return $this->items->sum(function($item) {
-        return $item->qty_proposed * $item->price_proposed;
-      });
-    }
+    // public function getTotalPropose() {
+    //   return $this->items->sum(function($item) {
+    //     return $item->qty_proposed * $item->price_proposed;
+    //   });
+    // }
     public function getLevelPropose() {
-        $total = $this->getTotalPropose();
+        $total = $this->total_proposed;
         if ($total <= 100000000)    //100 juta
             return 4;
         if ($total <= 500000000)    //100 Juta < Total <= 500 Juta
@@ -67,13 +67,13 @@ class Budget extends Model{
             return 2;
         return 1;
     }
-    public function getTotalVerify() {
-      return $this->items->sum(function($item) {
-        return $item->qty_proposed * $item->price_verified;
-      });
-    }
+    // public function getTotalVerify() {
+    //   return $this->items->sum(function($item) {
+    //     return $item->qty_proposed * $item->price_verified;
+    //   });
+    // }
     public function getLevelVerify() {
-        $total = $this->getTotalVerify();
+        $total = $this->total_verified;
         if ($total <= 100000000)    //100 juta
             return 8;
         if ($total <= 500000000)    //100 Juta < Total <= 500 Juta

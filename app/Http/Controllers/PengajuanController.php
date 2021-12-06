@@ -191,7 +191,6 @@ class PengajuanController extends Controller
         return $data;
     }
     public function budget_detail(Request $request, $api = true){
-        // return ['divisions_id'=> $request->division_id, 'created_by'=>$request->user_id];
         $data = Budget::where('id',$request->id)->with(['items'=>function($q){
             $q->orderBy('seq_no')->with(['accounts','materials','purchase_groups','item_categories','currencies','uom','gl_accounts','internal_orders','cost_centers','service'=>function($q){
                 $q->with(['uom','gl_accounts','internal_orders','cost_centers']);
