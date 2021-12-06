@@ -219,20 +219,20 @@
                                                         {{-- @endisset --}}
                                                         @break
                                                     @case('cost_centers')
-                                                        {{-- @isset($serv["cost_centers"]) --}}
+                                                        @isset($serv["cost_centers"])
                                                             <div class="text-sm text-gray-900">{{$serv["cost_centers"]['cost_center']}}</div>
                                                             <div class="text-xs text-gray-900">
                                                                 {{$serv["cost_centers"]['cost_center_desc']}}
                                                             </div>
-                                                        {{-- @endisset --}}
+                                                        @endisset
                                                         @break
                                                     @case('internal_orders')
-                                                        {{-- @isset($item["internal_orders"]) --}}
+                                                        @isset($serv["internal_orders"])
                                                             <div class="text-sm text-gray-900">{{$serv["internal_orders"]['io_code']}}</div>
                                                             {{-- <div class="text-xs text-gray-900">
                                                                 {{$item["assign"]['cc']['division']}}
                                                             </div> --}}
-                                                        {{-- @endisset --}}
+                                                        @endisset
                                                         @break
                                                     @default
                                                 @endswitch
