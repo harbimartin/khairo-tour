@@ -19,7 +19,8 @@ class Controller extends BaseController
     public function validing($request,$items){
         $validate = Validator::make($request,$items);
         if ($validate->fails()) {
-            return $this->resFailed(400, $validate->errors()->all());
+            $error = implode(",",$validate->errors()->all());
+            return $error;//s $this->resFailed(400, $validate->errors()->all());
         }else
             return null;
     }
