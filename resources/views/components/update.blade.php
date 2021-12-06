@@ -263,6 +263,7 @@
                         @break
                         @case('Upload')
                             <div class="inline-flex col-start-2 col-end-7">
+                                {{$datas['file']}}
                                 <input
                                     class="hidden"
                                     type="file"
@@ -270,8 +271,8 @@
                                     accept="application/pdf"
                                     v-on:change="uploadChange($event, '{{$key}}')"
                                 >
-                                <label class="bg-blue-400 hover:bg-blue-600 text-white cursor-pointer rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition" for="{{$key}}">Upload</label>
-                                <span claSS="my-auto ml-2" id="file-chosen-{{$key}}">No file chosen</span>
+                                <label class="bg-blue-400 hover:bg-blue-600 text-white cursor-pointer rounded border col-start-2 col-end-7 px-2 py-1 focus:shadow-inner focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-transparent transition" for="{{$key}}">Re-upload</label>
+                                <span claSS="my-auto ml-2" id="file-chosen-{{$key}}">@isset($datas['files']) {{$datas['files']['name']}}.{{$datas['files']['ext']}}  @else No file chosen @endisset</span>
                             </div>
                         @break
                         @case('Date')

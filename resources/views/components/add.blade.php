@@ -1,5 +1,5 @@
 <div class="px-6">
-    <form class="container rounded-lg shadow my-8 py-4 px-6 bg-white" action="{{request()->fullUrl()}}" method="POST">
+    <form class="container rounded-lg shadow my-8 py-4 px-6 bg-white" action="{{request()->fullUrl()}}" method="POST" enctype="multipart/form-data">
         <h1 class="border-b text-2xl pb-2 border-gray-200">
             @if($title!="Verifikasi")
                 {{$title}}

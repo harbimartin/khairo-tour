@@ -16,7 +16,7 @@ var vue = new Vue({
             const requestOptions = {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: name })
+                body: JSON.stringify({ id: name })
             };
             const response = await fetch("{!! url('/api/download_file') !!}", requestOptions);
             const data = await response.json();

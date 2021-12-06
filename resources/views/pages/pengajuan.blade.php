@@ -7,7 +7,7 @@
                 'document_type'=>[ 'name'=>"MRA Document", 'type'=>'TextSel', 'api'=>'pr_doc', 'val'=>['doc_type','doc_type_desc'], 'req'=> true ],
                 'budget_version'=>[ 'name'=>"Budget Version", 'type'=>'Select', 'api'=>'budget_version', 'val'=>['budget_version_code', 'budget_name'], 'full'=>true, 'req'=> true ],
                 'note_header'=>[ 'name'=>'Header Text', 'type'=>'TextArea', 'full'=>true, 'req'=> false ],
-                'budget_attachment'=>[ 'name'=>"Upload RAB", 'type'=>'Upload', 'val'=>'name', 'full'=>true, 'req'=> true , 'allow'=> ['pdf']],
+                'budget_file'=>[ 'key'=>'file_attachment', 'name'=>"Upload RAB", 'type'=>'Upload', 'val'=>'name', 'full'=>true, 'req'=> true , 'allow'=> ['pdf']],
             ];
             if (request()->mra){
                 $column['prd']['type'] = 'Disable';
@@ -37,7 +37,7 @@
                     burl="overview"
                 >
                     <input
-                        v-on:click="downloadFile('{{$header['budget_attachment']}}')"
+                        v-on:click="downloadFile('{{$header['id']}}')"
                         class="flex rounded border px-4 py-2 bg-blue-500 hover:bg-blue-600 mr-5 cursor-pointer text-white font-semibold"
                         type="button"
                         value="Download Lampiran"

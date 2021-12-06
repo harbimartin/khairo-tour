@@ -6,6 +6,7 @@ use App\Budget;
 use App\BudgetRpt;
 use App\BudgetStatusRpt;
 use App\BudgetVersionRpt;
+use App\File;
 use App\GenSerial;
 use App\SapDocType;
 use Exception;
@@ -66,22 +67,28 @@ class PengajuanController extends Controller
             'document_type' => 'required',
             'note_header' => 'required',
             'budget_version' => 'required',
-            'budget_attachment' => 'required',
+            'budget_file' => 'required',
         ]))
             return $this->index($request, $validate);
         try{
             $serial = GenSerial::where('SERIAL_ID','MRA')->first();
             $request['budget_code'] = $serial->PREFIX.date("y").str_pad($serial->NEXT_VALUE, $serial->LENGTH, '0', STR_PAD_LEFT);
-            // if ($request->budget_attachment){
-            //     if ($request->hasFile('budget_attachment')) {
-            //         $file = $request->file('budget_attachment');
-            //         $filename = $request['budget_code'].$file->getClientOriginalExtension();
-            //         $this->unlink_file('file_budget', $filename);
-            //         $file->move(public_path('file_budget'), $filename);
-            //         $request['budget_attachment'] = $filename;
-            //     }else
-            //         return $this->resFailed(404, $request->budget_attachment." file not emitted!");
-            // }
+            if ($request->budget_file){
+                if ($request->hasFile('budget_file')) {
+                    $file = $request->file('budget_file');
+                    $filename = $request['budget_code'].'.'.$file->getClientOriginalExtension();
+                    $this->unlink_files('file_budget', $filename);
+                    $file->move(public_path('file_budget'), $filename);
+                    $created_file = File::create([
+                        'code' => $request['budget_code'],
+                        'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                        'ext' => $file->getClientOriginalExtension()
+                    ]);
+                    $request['budget_attachment'] = $created_file->id;
+                }
+                // else
+                //     return $this->resFailed(404, $request->budget_file." file not emitted!");
+            }
             $request['budget_status'] = "Draft";
             $request['created_by'] = $_SESSION['ebudget_id'];
             $serial->increment('NEXT_VALUE');
@@ -152,9 +159,14 @@ class PengajuanController extends Controller
     }
 
     public function download(Request $request){
-        $file= public_path(). "/file_budget/".$request->name;
+        if ($request->id){
+            $budget_file = Budget::find($request->id)->files;
+            $file = public_path(). "/file_budget/".$budget_file->code.'.'.$budget_file->ext;
+        }else{
+            $file= public_path(). "/file_budget/".$request->name;
+        }
         $headers = array(
-                  'Content-Type: application/pdf',
+                'Content-Type: application/pdf',
                 );
         return Response::download($file, 'ebudget.pdf', $headers);
     }

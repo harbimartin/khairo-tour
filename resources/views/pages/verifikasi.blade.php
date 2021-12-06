@@ -46,7 +46,7 @@
     @if($tab!='propose')
         {{-- {{$header}} --}}
         <input
-            v-on:click="downloadFile('{{$header['budget_attachment']}}')"
+            v-on:click="downloadFile('{{$header['id']}}')"
             class="flex rounded border px-4 py-2 bg-blue-500 hover:bg-blue-600 ml-auto mr-5 cursor-pointer text-white font-semibold"
             type="button"
             value="Download Lampiran"

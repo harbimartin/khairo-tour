@@ -49,6 +49,9 @@ class Budget extends Model{
     public function services(){
         return $this->hasManyThrough(BudgetService::class, BudgetItem::class, 't_budget_id', 't_budget_item_id', 'id', 'id');
     }
+    public function files(){
+        return $this->hasOne(File::class, 'id', 'budget_attachment');
+    }
     public function getTotalPropose() {
       return $this->items->sum(function($item) {
         return $item->qty_proposed * $item->price_proposed;
